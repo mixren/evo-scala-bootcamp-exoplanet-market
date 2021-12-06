@@ -20,7 +20,7 @@ Regularly check the online exoplanets data for updates.
 - Once exoplanet is named keep all the changes with the user who named it.
 
 ## Exoplanets Source
-1) http://exoplanet.eu/catalog/ - **this one is used** in the project because of all (or close to that) discovered exoplanets can be fetched as one .csv file. (**hm, site is down 07/12/2021**)
+1) http://exoplanet.eu/catalog/ - **this one is used** in the project because of all (or close to that) discovered exoplanets can be fetched as one .csv file. (**hmm, site was down for 10 min 07/12/2021**)
 2) https://exoplanetarchive.ipac.caltech.edu/docs/data.html - not used in the project, because exoplanets here are distributed over multiple datasets grouped by the detection method, combining data is too much work.
 3) https://github.com/OpenExoplanetCatalogue/open_exoplanet_catalogue/ - Open Exoplanet Catalogue maintained and populated from NASA Exoplanet Archive. Not used, just added here for completion.
 
