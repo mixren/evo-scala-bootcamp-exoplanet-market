@@ -32,4 +32,4 @@ insert into "EXOPLANETS" values (12,'M2M0838+15 c', 0  ,  0.0509,  109.7, '23:00
 insert into "PURCHASES" values (1,'1RXS 1609 b','Goliath','fj094390jf3p9w', 3545983475);
 
 --timestamp should be long
-insert into "PURCHASES" values (1,'fj094390jf3p9w','user1','user@my.com', 3545983475);
+insert into "USERS" values (1,'fj094390jf3p9w','user1','user@my.com', 3545983475);
