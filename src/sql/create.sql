@@ -7,6 +7,10 @@ create table IF NOT EXISTS "PURCHASES" ("ID" INTEGER NOT NULL,"EXOPLANET_OFFICIA
                                          "BOUGHT_NAME" VARCHAR NOT NULL,"USER" VARCHAR NOT NULL,
                                          "TIMESTAMP" FLOAT NOT NULL);
 
+create table IF NOT EXISTS "USERS" ("ID" INTEGER NOT NULL,"USER_ID" VARCHAR NOT NULL,
+                                         "NAME" VARCHAR NOT NULL,"EMAIL" VARCHAR NOT NULL,
+                                         "TIMESTAMP" FLOAT NOT NULL);
+
 --In CSV from http://exoplanet.eu/ the columns are:
 --   1      3       9           77         71   72        25
 -- # name  mass   radius   star_distance   ra   dec   discovered
@@ -25,4 +29,7 @@ insert into "EXOPLANETS" values (11,'2M 0441+23 b', 1.8,  0.00639, 87.29, '',   
 insert into "EXOPLANETS" values (12,'M2M0838+15 c', 0  ,  0.0509,  109.7, '23:00:01.0','-45:05:11',1990);
 
 --timestamp should be long
-insert into "PURCHASES" values (1,'1RXS 1609 b','Goliath','user1', 3545983475);
+insert into "PURCHASES" values (1,'1RXS 1609 b','Goliath','fj094390jf3p9w', 3545983475);
+
+--timestamp should be long
+insert into "PURCHASES" values (1,'fj094390jf3p9w','user1','user@my.com', 3545983475);
