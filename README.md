@@ -32,7 +32,11 @@ Regularly check the online exoplanets data for updates.
 
 
 ## Current State
-Quickstarted the http4s Server with "HelloWorld" endpoint. Working on exoplanets' data fetching.
+- Quickstarted the http4s Server with "HelloWorld" endpoint.
+- Manually uploaded the .csv file full of exoplanets data
+- Now I have Exoplanet case class
+- Now I can read .csv, filter and convert it to objects
+- Now I can save objets to the local db using Doobie. My database is src/sql/exoplanets.db
 
 To do:
 1) Get the data from the site (CSV file)
