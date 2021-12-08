@@ -28,6 +28,7 @@ Regularly check the online exoplanets data for updates.
 1) https://http4s.org/v0.23/index.html - http4s server quick start
 2) https://circe.github.io/circe/ - JSON codecs library
 3) https://tpolecat.github.io/doobie/ - don't know yet...
+4) https://gist.github.com/isyufu/c2136288a41f3567aace09f030a83edd - Doobie + SQL + YOLO gist
 
 
 ## Current State
