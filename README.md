@@ -29,8 +29,7 @@ Regularly check the online exoplanets data for updates.
 2) https://circe.github.io/circe/ - JSON codecs library
 3) https://tpolecat.github.io/doobie/ - don't know yet...
 4) https://gist.github.com/isyufu/c2136288a41f3567aace09f030a83edd - Doobie + SQL + YOLO gist
-
-
+5) https://index.scala-lang.org/tototoshi/scala-csv/scala-csv/1.3.8?target=_3.x - CSV reading/writing library, handy for complex CSVs where commas are where not expected
 ## Current State
 - Quickstarted the http4s Server with "HelloWorld" endpoint.
 - Manually uploaded the .csv file full of exoplanets data

@@ -2,6 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket
 
 import cats.effect.{ExitCode, IOApp}
 
+
 import scala.util.Try
 //import cats.effect.unsafe.implicits.global
 //import cats._
@@ -10,8 +11,10 @@ import cats.effect.IO
 import cats.implicits._
 import doobie._
 import doobie.implicits._
+import com.github.tototoshi.csv._
+import java.io.File
 
-import scala.io.Source
+//import scala.io.Source
 
 /* library dependecies
    "org.xerial"   % "sqlite-jdbc"
@@ -21,7 +24,7 @@ import scala.io.Source
    "org.tpolecat" %% "doobie-scalatest"
 */
 
-object DoobieTry extends IOApp {
+/*object DoobieTry extends IOApp {
 
   private val xa = Transactor.fromDriverManager[IO](
     "org.sqlite.JDBC",
@@ -61,7 +64,7 @@ object DoobieTry extends IOApp {
     l <- sql"select rowid, name, age from person".query[Person].to[List].transact(xa)
     _ <- IO.delay(l.foreach(println))
   } yield ExitCode.Success
-}
+}*/
 
 
 object ExoplanetSqlFromCsv extends IOApp {
@@ -82,12 +85,12 @@ object ExoplanetSqlFromCsv extends IOApp {
     sql"""
         CREATE TABLE IF NOT EXISTS exoplanet (
           id INTEGER NOT NULL,
-          official_name PRIMARY KEY,
-          mass_jupiter LONG NULL,
-          radius_jupiter LONG NULL,
-          distance_pc LONG NULL,
-          ra TEXT NULL,
-          dec TEXT NULL,
+          official_name STRING PRIMARY KEY,
+          mass_jupiter FLOAT NULL,
+          radius_jupiter FLOAT NULL,
+          distance_pc FLOAT NULL,
+          ra FLOAT NULL,
+          dec FLOAT NULL,
           discovery_year INTEGER NULL
         )
     """.update.run
@@ -118,42 +121,42 @@ object ExoplanetSqlFromCsv extends IOApp {
   }
 
   private def fetchAll(): doobie.ConnectionIO[List[Exoplanet]] = {
-    sql"""select id, official_name, mass_jupiter, radius_jupiter,
-          distance_pc, ra, dec, discovery_year from exoplanet
+    sql"""SELECT id, official_name, mass_jupiter, radius_jupiter,
+          distance_pc, ra, dec, discovery_year FROM exoplanet
     """.query[Exoplanet].to[List]
   }
 
   // -----Domain
   case class OfficialName(name: String) extends AnyVal
-  case class Mass(mass: Long) extends AnyVal
+  case class Mass(mass: Float) extends AnyVal
   object Mass {
     def fromString(str: String): Option[Mass] =
       if (str.isEmpty) Option.empty[Mass]          // for long files is better to check first, than throw exceptions
-      else Try(str.toLong).toOption.map(Mass(_))
+      else Try(str.toFloat).toOption.map(Mass(_))
   }
-  case class Radius(radius: Long) extends AnyVal
+  case class Radius(radius: Float) extends AnyVal
   object Radius {
     def fromString(str: String): Option[Radius] =
       if (str.isEmpty) Option.empty[Radius]          // for long files is better to check first, than throw exceptions
-      else Try(str.toLong).toOption.map(Radius(_))
+      else Try(str.toFloat).toOption.map(Radius(_))
   }
-  case class Distance(distance: Long) extends AnyVal
+  case class Distance(distance: Float) extends AnyVal
   object Distance {
     def fromString(str: String): Option[Distance] =
       if (str.isEmpty) Option.empty[Distance]          // for long files is better to check first, than throw exceptions
-      else Try(str.toLong).toOption.map(Distance(_))
+      else Try(str.toFloat).toOption.map(Distance(_))
   }
-  case class Ra(ra: String) extends AnyVal
+  case class Ra(ra: Float) extends AnyVal
   object Ra {
     def fromString(str: String): Option[Ra] =
       if (str.isEmpty) Option.empty[Ra]           // for long files is better to check first, than throw exceptions
-      else Some(Ra(str))                          // TODO add regex matcher for '05:43:12.0'
+      else Try(str.toFloat).toOption.map(Ra(_))
   }
-  case class Dec(dec: String) extends AnyVal
+  case class Dec(dec: Float) extends AnyVal
   object Dec {
     def fromString(str: String): Option[Dec] =
       if (str.isEmpty) Option.empty[Dec]          // for long files is better to check first, than throw exceptions
-      else Some(Dec(str))                         // TODO add regex matcher for '-25:16:53'
+      else Try(str.toFloat).toOption.map(Dec(_))
   }
   case class Year(year: Int) extends AnyVal
   object Year {
@@ -184,21 +187,26 @@ object ExoplanetSqlFromCsv extends IOApp {
   // ----Methods
   def parseCsv(uri: String = "src/main/resources/exoplanet.eu_catalog.csv") =
     IO {
-      val source = Source.fromFile(uri)
-      val data = source.getLines().map(_.split(",")).toArray
-      source.close
+      val reader = CSVReader.open(new File(uri))
+      val data = reader.all()
+      reader.close()
+//      val source = Source.fromFile(uri)
+//      val data = source.getLines().map(_.split(",")).toArray
+//      source.close
       data
     }
 
-  private def filter(data: Array[Array[String]]) =
+  private def filter(data: List[List[String]]) =
     IO {
-      val indices = Array(0, 2, 8, 76, 70, 71, 24)  // csv columns of interest
+      // # name  mass   radius   star_distance   ra   dec   discovered
+      val colNames = List("# name", "mass", "radius", "star_distance", "ra", "dec", "discovered") // csv columns of interest
+      val indices = colNames.collect( col => data.head.indexOf(col) )
       data.map(row => indices collect row).drop(1)  // first element is column names
     }
 
-  private def generateExoplanets(filteredData: Array[Array[String]]) =
+  private def generateExoplanets(filteredData: List[List[String]]) =
     IO {
-      filteredData.zipWithIndex collect { case (Array(name, mass, radius, distance, ra, dec, year), id) =>
+      filteredData.zipWithIndex collect { case (List(name, mass, radius, distance, ra, dec, year), id) =>
         Exoplanet.fromCsvData(id, name, mass, radius, distance, ra, dec, year)
       }
     }
@@ -211,10 +219,12 @@ object ExoplanetSqlFromCsv extends IOApp {
       //_ <- IO.delay(data(0).foreach(println))
       filteredData <- filter(data)
       //_ <- IO.delay(filteredData(0).foreach(println))
+      _ <- IO.delay((List(0, 10, 30) collect filteredData).foreach(l => println(l.mkString(", "))))
       exoplanets <- generateExoplanets(filteredData)
-      //_ <- IO.delay(println(exoplanets(0).toString))
-      _ <- insertExoplanets(exoplanets.toList).quick
+      _ <- IO.delay(println(exoplanets.head.toString))
+
+      _ <- insertExoplanets(exoplanets).quick    // with YOLO
       l <- fetchAll().transact(xa)
-      _ <- IO.delay(l.foreach(println))
+      _ <- IO.delay((List(0, 10, 30) collect l).foreach(println))
     } yield ExitCode.Success
 }
