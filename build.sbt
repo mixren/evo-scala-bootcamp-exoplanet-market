@@ -20,7 +20,7 @@ lazy val root = (project in file("."))
       "org.typelevel"   %% "munit-cats-effect-3" % MunitCatsEffectVersion % Test,
       "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
       "org.scalameta"   %% "svm-subs"            % "20.2.0",
-      "org.xerial"      % "sqlite-jdbc"          % "3.36.0.2",
+      "org.xerial"      %  "sqlite-jdbc"         % "3.36.0.2",
       "org.tpolecat"    %% "doobie-core"         % "1.0.0-RC1",
       "org.tpolecat"    %% "doobie-hikari"       % "1.0.0-RC1", // HikariCP transactor.
       "org.tpolecat"    %% "doobie-specs2"       % "1.0.0-RC1", // Specs2 support for typechecking statements.

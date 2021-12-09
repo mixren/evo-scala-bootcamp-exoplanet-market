@@ -30,4 +30,18 @@ object ExoplanetmarketRoutes {
         } yield resp
     }
   }
+  // ^^^^^^ Remove ^^^^^
+
+
+  def fetchExoplanetsRoutes[F[_]: Sync]: HttpRoutes[F] = {
+    val dsl = new Http4sDsl[F] {}
+    import dsl._
+    HttpRoutes.of[F] {
+      case GET -> Root / "exoplanets" / "all" =>
+        for {
+          // TODO
+          resp <- Ok()
+        } yield resp
+    }
+  }
 }

@@ -2,23 +2,23 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.script
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.github.tototoshi.csv.CSVReader
-import doobie.Transactor
+import doobie.util.transactor.Transactor.Aux
 import io.github.mixren.evoscalabootcampexoplanetmarket.DbCommon._
-import io.github.mixren.evoscalabootcampexoplanetmarket.DbConfig._
-import io.github.mixren.evoscalabootcampexoplanetmarket.Exoplanet
+import io.github.mixren.evoscalabootcampexoplanetmarket.{DbTransactor, Exoplanet}
 //import doobie._
 import doobie.implicits._
 
 import java.io.File
 
+/**
+  * Supportive script.
+  * Read raw .csv file downloaded from http://exoplanet.eu/catalog/
+  * and stored as src/main/resources/exoplanet.eu_catalog.csv,
+  * filter it and create 'exoplanets' table in local sql database.
+  */
 object ExoplanetSqlFromCsv extends IOApp {
 
-  private val xa = Transactor.fromDriverManager[IO](
-    dbDriverName,
-    dbUrl,
-    dbUser,
-    dbPwd
-  )
+  val xa: Aux[IO, Unit] = DbTransactor.makeXa
 
   private val y = xa.yolo // To use .quick
   import y._
@@ -51,6 +51,7 @@ object ExoplanetSqlFromCsv extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
+      _ <- dropTableExoplanets.transact(xa)
       _ <- createTableExoplanetsSql.transact(xa)
       data <- parseCsv("src/main/resources/exoplanet.eu_catalog.csv")
       //_ <- IO.delay(data(0).foreach(println))

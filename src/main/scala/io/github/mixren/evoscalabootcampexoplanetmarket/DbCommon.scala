@@ -9,7 +9,7 @@ object DbCommon {
     sql"""
         CREATE TABLE IF NOT EXISTS exoplanets (
           id INTEGER NOT NULL,
-          official_name STRING PRIMARY KEY,
+          official_name TEXT PRIMARY KEY,
           mass_jupiter FLOAT NULL,
           radius_jupiter FLOAT NULL,
           distance_pc FLOAT NULL,
@@ -19,10 +19,10 @@ object DbCommon {
         )
     """.update.run
 
-  /*private val dropTableExoplanets =
+  val dropTableExoplanets =
       sql"""
         DROP TABLE IF EXISTS exoplanets
-      """.update.run*/
+      """.update.run
 
   /*def insertExoplanet(exp: Exoplanet): Update0 =
     sql"""
