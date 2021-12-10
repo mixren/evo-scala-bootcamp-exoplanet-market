@@ -20,23 +20,30 @@ Regularly check the online exoplanets data for updates.
 - Once exoplanet is named keep all the changes with the user who named it.
 
 ## Exoplanets Source
-1) http://exoplanet.eu/catalog/ - **this one is used** in the project because of all (or close to that) discovered exoplanets can be fetched as one .csv file. (**hmm, site was down for 10 min 07/12/2021**)
-2) https://exoplanetarchive.ipac.caltech.edu/docs/data.html - not used in the project, because exoplanets here are distributed over multiple datasets grouped by the detection method, combining data is too much work.
-3) https://github.com/OpenExoplanetCatalogue/open_exoplanet_catalogue/ - Open Exoplanet Catalogue maintained and populated from NASA Exoplanet Archive. Not used, just added here for completion.
+1) http://exoplanet.eu/catalog/ - **this one is used** in the project because of all (or close to that) discovered
+exoplanets can be fetched as one .csv file. (**hmm, site was down for 10 min 07/12/2021**)
+2) https://exoplanetarchive.ipac.caltech.edu/docs/data.html - not used in the project, because exoplanets here are
+distributed over multiple datasets grouped by the detection method, combining data is too much work.
+3) https://github.com/OpenExoplanetCatalogue/open_exoplanet_catalogue/ - Open Exoplanet Catalogue maintained and
+populated from NASA Exoplanet Archive. Not used, just added here for completion.
 
 ## Useful links
 1) https://http4s.org/v0.23/index.html - http4s server quick start
 2) https://circe.github.io/circe/ - JSON codecs library
-3) https://tpolecat.github.io/doobie/ - don't know yet...
-4) https://gist.github.com/isyufu/c2136288a41f3567aace09f030a83edd - Doobie + SQL + YOLO gist
-5) https://index.scala-lang.org/tototoshi/scala-csv/scala-csv/1.3.8?target=_3.x - CSV reading/writing library, handy for complex CSVs where commas are where not expected
+3) https://tpolecat.github.io/doobie/ - database helper, e.g. to work with sql
+4) https://www.scala-exercises.org/doobie/connecting_to_database - Doobie helpful examples
+5) https://gist.github.com/isyufu/c2136288a41f3567aace09f030a83edd - Doobie + SQL + YOLO gist
+6) https://index.scala-lang.org/tototoshi/scala-csv/scala-csv/1.3.8?target=_3.x - CSV reading/writing library,
+handy for complex CSVs where commas are where not expected
+7) https://jwt.io/introduction - JSON Web Token based authentication
+
 ## Current State
 - Quickstarted the http4s Server with "HelloWorld" endpoint.
 - Manually uploaded the .csv file full of exoplanets data
 - Now I have Exoplanet case class
 - Now I can read .csv, filter and convert it to objects
-- Now I can save objets to the local db using Doobie. My database is src/sql/exoplanets.db
-- Have a route that read DB and return exoplanets as JSON
+- Now I can save objets to the local sql db using Doobie. My database is src/sql/exoplanets.db
+- Have a route, which reads DB and returns exoplanets as JSON
 
-To do:
-1) ?
+### To do:
+1) Implement user authentication
