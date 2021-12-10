@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.todelete
 
 import cats.Applicative
 import cats.implicits._

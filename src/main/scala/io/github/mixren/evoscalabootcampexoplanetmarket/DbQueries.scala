@@ -3,23 +3,23 @@ package io.github.mixren.evoscalabootcampexoplanetmarket
 import doobie.implicits._
 import doobie.util.update.Update
 
-object DbCommon {
+object DbQueries {
 
   val createTableExoplanetsSql: doobie.ConnectionIO[Int] =
     sql"""
         CREATE TABLE IF NOT EXISTS exoplanets (
           id INTEGER NOT NULL,
           official_name TEXT PRIMARY KEY,
-          mass_jupiter FLOAT NULL,
-          radius_jupiter FLOAT NULL,
-          distance_pc FLOAT NULL,
-          ra FLOAT NULL,
-          dec FLOAT NULL,
+          mass_jupiter DOUBLE NULL,
+          radius_jupiter DOUBLE NULL,
+          distance_pc DOUBLE NULL,
+          ra DOUBLE NULL,
+          dec DOUBLE NULL,
           discovery_year INTEGER NULL
         )
     """.update.run
 
-  val dropTableExoplanets =
+  val dropTableExoplanets: doobie.ConnectionIO[Int] =
       sql"""
         DROP TABLE IF EXISTS exoplanets
       """.update.run
@@ -48,6 +48,11 @@ object DbCommon {
     sql"""SELECT id, official_name, mass_jupiter, radius_jupiter,
           distance_pc, ra, dec, discovery_year FROM exoplanets
     """.query[Exoplanet].to[List]
+  }
+
+  def fetch5Exoplanets(): doobie.ConnectionIO[List[Exoplanet]] = {
+    sql"""SELECT * FROM exoplanets
+    """.query[Exoplanet].stream.take(5).compile.toList
   }
 
 }

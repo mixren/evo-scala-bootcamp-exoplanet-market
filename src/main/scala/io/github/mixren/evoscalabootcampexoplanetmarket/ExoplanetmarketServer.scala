@@ -4,6 +4,7 @@ import cats.effect.{Async, Resource}
 import cats.syntax.all._
 import com.comcast.ip4s._
 import fs2.Stream
+import io.github.mixren.evoscalabootcampexoplanetmarket.todelete.{DefRoutes, HelloWorld, Jokes}
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
@@ -22,8 +23,9 @@ object ExoplanetmarketServer {
       // want to extract a segments not checked
       // in the underlying routes.
       httpApp = (
-        ExoplanetmarketRoutes.helloWorldRoutes[F](helloWorldAlg) <+>
-        ExoplanetmarketRoutes.jokeRoutes[F](jokeAlg)
+        DefRoutes.helloWorldRoutes[F](helloWorldAlg) <+>
+        DefRoutes.jokeRoutes[F](jokeAlg) <+>
+        ExoplanetmarketRoutes.fetchExoplanetsRoutes[F]
       ).orNotFound
 
       // With Middlewares in place

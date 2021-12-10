@@ -36,8 +36,7 @@ Regularly check the online exoplanets data for updates.
 - Now I have Exoplanet case class
 - Now I can read .csv, filter and convert it to objects
 - Now I can save objets to the local db using Doobie. My database is src/sql/exoplanets.db
+- Have a route that read DB and return exoplanets as JSON
 
 To do:
-1) Get the data from the site (CSV file)
-2) Create an exoplanet table and then insert the data to the SQLite
-3) One endpoint in the application to query the DB ( SQLite ) and display it as a JSON
+1) ?

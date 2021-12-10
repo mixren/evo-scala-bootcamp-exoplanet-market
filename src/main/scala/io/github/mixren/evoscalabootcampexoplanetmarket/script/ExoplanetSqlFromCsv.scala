@@ -3,7 +3,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.script
 import cats.effect.{ExitCode, IO, IOApp}
 import com.github.tototoshi.csv.CSVReader
 import doobie.util.transactor.Transactor.Aux
-import io.github.mixren.evoscalabootcampexoplanetmarket.DbCommon._
+import io.github.mixren.evoscalabootcampexoplanetmarket.DbQueries._
 import io.github.mixren.evoscalabootcampexoplanetmarket.{DbTransactor, Exoplanet}
 //import doobie._
 import doobie.implicits._
@@ -12,6 +12,7 @@ import java.io.File
 
 /**
   * Supportive script.
+  *
   * Read raw .csv file downloaded from http://exoplanet.eu/catalog/
   * and stored as src/main/resources/exoplanet.eu_catalog.csv,
   * filter it and create 'exoplanets' table in local sql database.
@@ -44,7 +45,7 @@ object ExoplanetSqlFromCsv extends IOApp {
   private def generateExoplanets(filteredData: List[List[String]]) =
     IO {
       filteredData.zipWithIndex collect { case (List(name, mass, radius, distance, ra, dec, year), id) =>
-        Exoplanet.fromCsvData(id, name, mass, radius, distance, ra, dec, year)
+        Exoplanet.fromCsvData(id + 1, name, mass, radius, distance, ra, dec, year)
       }
     }
 

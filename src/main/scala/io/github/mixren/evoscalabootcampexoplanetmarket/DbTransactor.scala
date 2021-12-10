@@ -3,8 +3,8 @@ package io.github.mixren.evoscalabootcampexoplanetmarket
 //import cats.effect.{Async, IO, Resource}
 //import doobie.hikari.HikariTransactor
 //import doobie.{ExecutionContexts, Transactor}
+import cats.effect.Async
 import doobie.Transactor
-import cats.effect.IO
 import doobie.util.transactor.Transactor.Aux
 import io.github.mixren.evoscalabootcampexoplanetmarket.DbConfig._
 
@@ -51,10 +51,17 @@ object DbTransactor {
 
   // Simple transactor (or close to it), but for the commented ones I cant implement Blocker,
   // I cant add cats effect 2 dependency because it asks for the later versions
-  def makeXa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
+  def makeXa[F[_]: Async]: Aux[F, Unit] = Transactor.fromDriverManager[F](
     dbDriverName,
     dbUrl,
     dbUser,
     dbPwd
   )
+
+  /*def makeXa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
+    dbDriverName,
+    dbUrl,
+    dbUser,
+    dbPwd
+  )*/
 }

@@ -1,47 +1,31 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
-import cats.effect.Sync
+import cats.effect.Async
 import cats.implicits._
+import doobie.implicits._
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 
+
 object ExoplanetmarketRoutes {
 
-  def jokeRoutes[F[_]: Sync](J: Jokes[F]): HttpRoutes[F] = {
-    val dsl = new Http4sDsl[F]{}
-    import dsl._
-    HttpRoutes.of[F] {
-      case GET -> Root / "joke" =>
-        for {
-          joke <- J.get
-          resp <- Ok(joke)
-        } yield resp
-    }
-  }
+  def fetchExoplanetsRoutes[F[_]: Async]: HttpRoutes[F] = {
+    import org.http4s.circe.CirceEntityCodec._
 
-  def helloWorldRoutes[F[_]: Sync](H: HelloWorld[F]): HttpRoutes[F] = {
-    val dsl = new Http4sDsl[F]{}
-    import dsl._
-    HttpRoutes.of[F] {
-      case GET -> Root / "hello" / name =>
-        for {
-          greeting <- H.hello(HelloWorld.Name(name))
-          resp <- Ok(greeting)
-        } yield resp
-    }
-  }
-  // ^^^^^^ Remove ^^^^^
-
-
-  def fetchExoplanetsRoutes[F[_]: Sync]: HttpRoutes[F] = {
     val dsl = new Http4sDsl[F] {}
     import dsl._
     HttpRoutes.of[F] {
+      // curl http://localhost:8080/exoplanets/all
       case GET -> Root / "exoplanets" / "all" =>
+        val xa = DbTransactor.makeXa
         for {
-          // TODO
-          resp <- Ok()
-        } yield resp
+          exoplanetsE <- DbQueries.fetchAllExoplanets().transact(xa).attempt
+          response   <- exoplanetsE match {
+            case Left(throwable: Throwable) => BadRequest(throwable.getMessage)
+            case Right(exoplanets) => Ok(exoplanets)
+          }
+        } yield response
+
     }
   }
 }
