@@ -4,8 +4,6 @@ import cats.effect.{Async, Resource}
 import cats.syntax.all._
 import com.comcast.ip4s._
 import fs2.Stream
-import io.github.mixren.evoscalabootcampexoplanetmarket.todelete.{DefRoutes, HelloWorld, Jokes}
-import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.middleware.Logger
@@ -13,6 +11,21 @@ import org.http4s.server.middleware.Logger
 object ExoplanetmarketServer {
 
   def stream[F[_]: Async]: Stream[F, Nothing] = {
+    val httpApp = ExoplanetmarketRoutes.fetchExoplanetsRoutes[F].orNotFound
+    // With Middlewares in place
+    val finalHttpApp = Logger.httpApp(logHeaders = true, logBody = true)(httpApp)
+
+    Stream.resource(
+      EmberServerBuilder.default[F]
+        .withHost(ipv4"0.0.0.0")
+        .withPort(port"8080")
+        .withHttpApp(finalHttpApp)
+        .build >>
+        Resource.eval(Async[F].never[Unit])
+    ).drain
+  }
+
+  /*def stream[F[_]: Async]: Stream[F, Nothing] = {
     for {
       client <- Stream.resource(EmberClientBuilder.default[F].build)
       helloWorldAlg = HelloWorld.impl[F]
@@ -40,5 +53,6 @@ object ExoplanetmarketServer {
         Resource.eval(Async[F].never)
       )
     } yield exitCode
-  }.drain
+
+  }.drain*/
 }
