@@ -10,9 +10,14 @@ import scala.util.Try
 
 
 // Some params are options because the original .csv file might not have these values (they are "")
-case class Exoplanet(id: Int, officialName: OfficialName, mass: Option[Mass],
-                     radius: Option[Radius], distance: Option[Distance],
-                     ra: Option[Ra], dec: Option[Dec], discoveryYear: Option[Year])
+case class Exoplanet(id: Int,
+                     officialName: OfficialName,
+                     mass: Option[Mass],
+                     radius: Option[Radius],
+                     distance: Option[Distance],
+                     ra: Option[Ra],
+                     dec: Option[Dec],
+                     discoveryYear: Option[Year])
 object Exoplanet {
   implicit val decoder: Decoder[Exoplanet] = deriveDecoder[Exoplanet]
   implicit val encoder: Encoder[Exoplanet] = deriveEncoder[Exoplanet]
@@ -33,6 +38,12 @@ object Exoplanet {
     )
 }
 
+/*object MyConverter {
+  def odFromString[A](str: String): Option[Double] = {
+    if (str.isEmpty) Option.empty[Double] // for long files is better to check first, than throw exceptions
+    else Try(str.toDouble).toOption
+  }
+}*/
 
 case class OfficialName(name: String) extends AnyVal
 object OfficialName {
