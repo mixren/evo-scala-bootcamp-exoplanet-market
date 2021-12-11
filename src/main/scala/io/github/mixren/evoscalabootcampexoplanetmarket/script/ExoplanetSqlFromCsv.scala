@@ -3,7 +3,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.script
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.github.tototoshi.csv.CSVReader
 import doobie.hikari.HikariTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.DbQueries._
+import io.github.mixren.evoscalabootcampexoplanetmarket.ExoplanetsDbQueries._
 import io.github.mixren.evoscalabootcampexoplanetmarket.DbTransactor
 import doobie.implicits._
 import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet

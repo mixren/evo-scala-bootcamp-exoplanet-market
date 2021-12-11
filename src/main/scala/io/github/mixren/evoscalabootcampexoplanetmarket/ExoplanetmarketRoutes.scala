@@ -2,7 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket
 
 import cats.effect.Async
 import cats.implicits._
-import doobie.implicits._
+//import doobie.implicits._
 import io.github.mixren.evoscalabootcampexoplanetmarket.domain.{User, UserName, UserPassword}
 import io.github.mixren.evoscalabootcampexoplanetmarket.repository.{ExoplanetsRepository, UserRepository}
 import org.http4s.HttpRoutes
@@ -43,7 +43,7 @@ object ExoplanetmarketRoutes {
     val dsl = new Http4sDsl[F] {}
     import dsl._
 
-    //val transactor = DbTransactor.pooled[F]
+    val transactor = DbTransactor.pooled[F]
 
     HttpRoutes.of[F] {
       // curl http://localhost:8080/auth/login -d '{"name": "John", "password": "123456"}' -H "Content-Type: application/json"
@@ -51,10 +51,17 @@ object ExoplanetmarketRoutes {
 
         req.as[User].handleError(_ => User(UserName("a"), UserPassword("1"))).flatMap { user =>
           // TODO first, check user in db
+          for {
+            userE <- transactor.use(xa => new UserRepository[F](xa).userByName(user.userName).attempt)
+            response   <- userE match {
+              case Left(throwable: Throwable) => BadRequest(throwable.getMessage)
+              case Right(_)                   => Ok(jwtEncode(user))
+            }
+          } yield response
           //UserRepository
           // if exists - authenticate
-          val token: String = jwtEncode(user)
-          Ok(token)
+          //val token: String = jwtEncode(user)
+          //Ok(token)
         }
     }
   }

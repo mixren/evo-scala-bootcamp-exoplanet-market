@@ -4,11 +4,13 @@ import doobie.implicits._
 import doobie.util.update.Update
 import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet
 
-object DbQueries {
+object ExoplanetsDbQueries {
+  private val table = "exoplanets"
+
 
   val createTableExoplanetsSql: doobie.ConnectionIO[Int] =
     sql"""
-        CREATE TABLE IF NOT EXISTS exoplanets (
+        CREATE TABLE IF NOT EXISTS $table (
           id INTEGER NOT NULL,
           official_name TEXT PRIMARY KEY,
           mass_jupiter DOUBLE NULL,
@@ -22,7 +24,7 @@ object DbQueries {
 
   val dropTableExoplanets: doobie.ConnectionIO[Int] =
       sql"""
-        DROP TABLE IF EXISTS exoplanets
+        DROP TABLE IF EXISTS $table
       """.update.run
 
   /*def insertExoplanet(exp: Exoplanet): Update0 =
@@ -36,8 +38,8 @@ object DbQueries {
     """.update*/
 
   def insertExoplanets(exps: List[Exoplanet]): doobie.ConnectionIO[Int] = {
-    val sql = """
-                |INSERT INTO exoplanets(
+    val sql = s"""
+                |INSERT INTO $table(
                 |  id, official_name, mass_jupiter, radius_jupiter,
                 |  distance_pc, ra, dec, discovery_year)
                 |  values (?, ?, ?, ?, ?, ?, ?, ?)
@@ -47,12 +49,12 @@ object DbQueries {
 
   def fetchAllExoplanets: doobie.ConnectionIO[List[Exoplanet]] = {
     sql"""SELECT id, official_name, mass_jupiter, radius_jupiter,
-          distance_pc, ra, dec, discovery_year FROM exoplanets
+          distance_pc, ra, dec, discovery_year FROM $table
     """.query[Exoplanet].to[List]
   }
 
   def fetch5Exoplanets(): doobie.ConnectionIO[List[Exoplanet]] = {
-    sql"""SELECT * FROM exoplanets
+    sql"""SELECT * FROM $table
     """.query[Exoplanet].stream.take(5).compile.toList
   }
 
