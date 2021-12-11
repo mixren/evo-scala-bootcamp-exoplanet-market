@@ -5,12 +5,12 @@ import doobie.util.update.Update
 import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet
 
 object ExoplanetsDbQueries {
-  private val table = "exoplanets"
+  // private val table = "exoplanets"  <- TODO how to insert value into sql strings??
 
 
   val createTableExoplanetsSql: doobie.ConnectionIO[Int] =
     sql"""
-        CREATE TABLE IF NOT EXISTS $table (
+        CREATE TABLE IF NOT EXISTS exoplanets (
           id INTEGER NOT NULL,
           official_name TEXT PRIMARY KEY,
           mass_jupiter DOUBLE NULL,
@@ -24,7 +24,7 @@ object ExoplanetsDbQueries {
 
   val dropTableExoplanets: doobie.ConnectionIO[Int] =
       sql"""
-        DROP TABLE IF EXISTS $table
+        DROP TABLE IF EXISTS exoplanets
       """.update.run
 
   /*def insertExoplanet(exp: Exoplanet): Update0 =
@@ -38,8 +38,8 @@ object ExoplanetsDbQueries {
     """.update*/
 
   def insertExoplanets(exps: List[Exoplanet]): doobie.ConnectionIO[Int] = {
-    val sql = s"""
-                |INSERT INTO $table(
+    val sql = """
+                |INSERT INTO exoplanets(
                 |  id, official_name, mass_jupiter, radius_jupiter,
                 |  distance_pc, ra, dec, discovery_year)
                 |  values (?, ?, ?, ?, ?, ?, ?, ?)
@@ -49,12 +49,12 @@ object ExoplanetsDbQueries {
 
   def fetchAllExoplanets: doobie.ConnectionIO[List[Exoplanet]] = {
     sql"""SELECT id, official_name, mass_jupiter, radius_jupiter,
-          distance_pc, ra, dec, discovery_year FROM $table
+          distance_pc, ra, dec, discovery_year FROM exoplanets
     """.query[Exoplanet].to[List]
   }
 
   def fetch5Exoplanets(): doobie.ConnectionIO[List[Exoplanet]] = {
-    sql"""SELECT * FROM $table
+    sql"""SELECT * FROM exoplanets
     """.query[Exoplanet].stream.take(5).compile.toList
   }
 

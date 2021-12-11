@@ -33,10 +33,11 @@ populated from NASA Exoplanet Archive. Not used, just added here for completion.
 3) https://tpolecat.github.io/doobie/ - database helper, e.g. to work with sql
 4) https://www.scala-exercises.org/doobie/connecting_to_database - Doobie helpful examples
 5) https://gist.github.com/isyufu/c2136288a41f3567aace09f030a83edd - Doobie + SQL + YOLO gist
-6) https://index.scala-lang.org/tototoshi/scala-csv/scala-csv/1.3.8?target=_3.x - CSV reading/writing library,
+6) https://github.com/tpolecat/doobie/issues/795 - How to use pooled Transactor (wrap the whole server)
+7) https://index.scala-lang.org/tototoshi/scala-csv/scala-csv/1.3.8?target=_3.x - CSV reading/writing library,
 handy for complex CSVs where commas are where not expected
-7) https://jwt.io/introduction - JSON Web Token based authentication
-8) https://jwt-scala.github.io/jwt-scala/jwt-circe.html - JWT usage with Circe codecs
+8) https://jwt.io/introduction - JSON Web Token based authentication
+9) https://jwt-scala.github.io/jwt-scala/jwt-circe.html - JWT usage with Circe codecs
 
 ## Current State
 - Quickstarted the http4s Server with "HelloWorld" endpoint.

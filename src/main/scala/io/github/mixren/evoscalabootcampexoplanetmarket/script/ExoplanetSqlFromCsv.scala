@@ -1,11 +1,10 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket.script
 
-import cats.effect.{ExitCode, IO, IOApp, Resource}
+import cats.effect.{ExitCode, IO, IOApp}
 import com.github.tototoshi.csv.CSVReader
-import doobie.hikari.HikariTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.ExoplanetsDbQueries._
-import io.github.mixren.evoscalabootcampexoplanetmarket.DbTransactor
 import doobie.implicits._
+import io.github.mixren.evoscalabootcampexoplanetmarket.DbTransactor
+import io.github.mixren.evoscalabootcampexoplanetmarket.ExoplanetsDbQueries._
 import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet
 
 import java.io.File
@@ -44,20 +43,23 @@ object ExoplanetSqlFromCsv extends IOApp {
     }
 
 
-  val transactor: Resource[IO, HikariTransactor[IO]] = DbTransactor.pooled[IO]
-  override def run(args: List[String]): IO[ExitCode] =
-    for {
-      _             <- transactor.use(dropTableExoplanets.transact[IO])
-      _             <- transactor.use(createTableExoplanetsSql.transact[IO])
-      data          <- parseCsv("src/main/resources/exoplanet.eu_catalog.csv")
-      //_             <- IO.delay(data(0).foreach(println))
-      filteredData  <- filter(data)
-      //_             <- IO.delay((List(0, 10, 30) collect filteredData).foreach(l => println(l.mkString(", "))))
-      exoplanets    <- generateExoplanets(filteredData)
-      _             <- IO.delay(println(exoplanets.head.toString))
-      nIns          <- transactor.use(insertExoplanets(exoplanets).transact[IO])
-      _             <- IO.delay(println(s"Inserted rows: $nIns"))
-      l             <- transactor.use(fetchAllExoplanets.transact[IO])
-      _             <- IO.delay((List(0, 10, 30) collect l).foreach(println))
-    } yield ExitCode.Success
+
+  override def run(args: List[String]): IO[ExitCode] = {
+    DbTransactor.pooled[IO].use { xa =>
+      for {
+        _ <- dropTableExoplanets.transact[IO](xa)
+        _ <- createTableExoplanetsSql.transact[IO](xa)
+        data <- parseCsv("src/main/resources/exoplanet.eu_catalog.csv")
+        //_             <- IO.delay(data(0).foreach(println))
+        filteredData <- filter(data)
+        //_             <- IO.delay((List(0, 10, 30) collect filteredData).foreach(l => println(l.mkString(", "))))
+        exoplanets <- generateExoplanets(filteredData)
+        _ <- IO.delay(println(exoplanets.head.toString))
+        nIns <- insertExoplanets(exoplanets).transact[IO](xa)
+        _ <- IO.delay(println(s"Inserted rows: $nIns"))
+        l <- fetchAllExoplanets.transact[IO](xa)
+        _ <- IO.delay((List(0, 10, 30) collect l).foreach(println))
+      } yield ExitCode.Success
+    }
+  }
 }

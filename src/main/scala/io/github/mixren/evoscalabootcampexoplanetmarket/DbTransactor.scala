@@ -34,8 +34,7 @@ object DbTransactor {
     } yield xa
 
 
-  // Simple transactor (or close to it), but for the commented ones I cant implement Blocker,
-  // I cant add cats effect 2 dependency because it asks for the later versions
+  // Simple transactor (or close to it)
   def makeXa[F[_]: Async]: Aux[F, Unit] = Transactor.fromDriverManager[F](
     dbDriverName,
     dbUrl,

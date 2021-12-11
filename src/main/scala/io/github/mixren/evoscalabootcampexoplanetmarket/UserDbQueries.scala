@@ -3,33 +3,34 @@ package io.github.mixren.evoscalabootcampexoplanetmarket
 import doobie.implicits._
 import io.github.mixren.evoscalabootcampexoplanetmarket.domain.{User, UserName}
 
+import java.time.Instant
+
 
 object UserDbQueries {
-  private val table = "users"
-
 
   val createTableUsersSql: doobie.ConnectionIO[Int] =
     sql"""
-        CREATE TABLE IF NOT EXISTS $table (
-          id INTEGER NOT NULL AUTO_INCREMENT,
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER AUTO_INCREMENT,
           username TEXT PRIMARY KEY,
-          password INTEGER NOT NULL
+          password TEXT NOT NULL,
+          registration_timestamp LONG NOT NULL
         )
     """.update.run
 
   val dropTableUsers: doobie.ConnectionIO[Int] =
     sql"""
-        DROP TABLE IF EXISTS $table
+        DROP TABLE IF EXISTS users
       """.update.run
 
-  def insertExoplanet(user: User): doobie.ConnectionIO[Int] =
+  def insertUser(user: User, instant: Instant): doobie.ConnectionIO[Int] =
     sql"""
-          INSERT INTO $table(username, password)
-            values (${user.userName}, ${user.userPassword})
+          INSERT INTO users (username, password, registration_timestamp)
+            values (${user.userName}, ${user.userPassword}, ${instant.toEpochMilli})
     """.update.run
 
-  def fetchByName(username: UserName): doobie.ConnectionIO[User] = {
-    sql"""SELECT username, password FROM $table WHERE username = '$username'
-    """.query[User].unique
+  def fetchByName(username: UserName): doobie.ConnectionIO[Option[User]] = {
+    sql"""SELECT username, password FROM users WHERE username = '$username'
+    """.query[User].option
   }
 }
