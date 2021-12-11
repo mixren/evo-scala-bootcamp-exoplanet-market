@@ -1,6 +1,7 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
 import cats.effect.IO
+import io.github.mixren.evoscalabootcampexoplanetmarket.domain.{Dec, Distance, Exoplanet, OfficialName, Ra, Radius, Year}
 import io.github.mixren.evoscalabootcampexoplanetmarket.todelete.{DefRoutes, HelloWorld}
 import munit.CatsEffectSuite
 import org.http4s._

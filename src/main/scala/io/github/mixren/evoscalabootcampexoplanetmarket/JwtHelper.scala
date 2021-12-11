@@ -1,10 +1,14 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
 import java.time.Instant
-import pdi.jwt.{JwtCirce, JwtAlgorithm, JwtClaim}
+import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
 import io.circe.syntax.EncoderOps
+import io.github.mixren.evoscalabootcampexoplanetmarket.domain.User
 
 object JwtHelper {
+
+  private val key = "secretKey"
+  private val algo = JwtAlgorithm.HS256
 
   /**
    * Uses external library.
@@ -16,16 +20,43 @@ object JwtHelper {
    */
   def jwtEncode(user: User): String = {
     val userJson = user.asJson.noSpaces
-    println(userJson)
     val claim = JwtClaim(
       content = userJson,
       expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
       issuedAt = Some(Instant.now.getEpochSecond)
     )
     // claim: JwtClaim = JwtClaim({}, None, None, None, Some(1791123256), None, Some(1633338496), None)
-    val key = "secretKey"
-    val algo = JwtAlgorithm.HS256
+
     JwtCirce.encode(claim, key, algo)
+  }
+
+  def jwtDecode(token: String) = {
+    // You can decode to JsObject
+    JwtCirce.decodeJson(token, key, Seq(JwtAlgorithm.HS256))
+    // res8: util.Try[io.circe.Json] = Success(
+    //   value = JObject(value = object[exp -> 1791123256,iat -> 1633338496])
+    // )
+    JwtCirce.decodeJsonAll(token, key, Seq(JwtAlgorithm.HS256))
+    // res9: util.Try[(io.circe.Json, io.circe.Json, String)] = Success(
+    //   value = (
+    //     JObject(value = object[typ -> "JWT",alg -> "HS256"]),
+    //     JObject(value = object[exp -> 1791123256,iat -> 1633338496]),
+    //     "mvDSTVzGgZvhBf6Iw7zdijJ3bFozj9UeJkelFyr-pws"
+    //   )
+    // )
+    // Or to case classes
+    JwtCirce.decode(token, key, Seq(JwtAlgorithm.HS256))
+    // res10: util.Try[JwtClaim] = Success(
+    //   value = JwtClaim({}, None, None, None, Some(1791123256), None, Some(1633338496), None)
+    // )
+    JwtCirce.decodeAll(token, key, Seq(JwtAlgorithm.HS256))
+    // res11: util.Try[(pdi.jwt.JwtHeader, JwtClaim, String)] = Success(
+    //   value = (
+    //     JwtHeader(Some(HS256), Some(JWT), None, None),
+    //     JwtClaim({}, None, None, None, Some(1791123256), None, Some(1633338496), None),
+    //     "mvDSTVzGgZvhBf6Iw7zdijJ3bFozj9UeJkelFyr-pws"
+    //   )
+    // )
   }
 
 }

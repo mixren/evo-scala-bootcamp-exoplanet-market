@@ -1,11 +1,12 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.domain
 
 import cats.effect.Concurrent
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
 import io.circe.generic.semiauto._
+import io.circe.{Decoder, Encoder}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import org.http4s.{EntityDecoder, EntityEncoder}
+
 import scala.util.Try
 
 

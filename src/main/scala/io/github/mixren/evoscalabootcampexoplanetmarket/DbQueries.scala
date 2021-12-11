@@ -2,6 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket
 
 import doobie.implicits._
 import doobie.util.update.Update
+import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet
 
 object DbQueries {
 
@@ -44,7 +45,7 @@ object DbQueries {
     Update[Exoplanet](sql).updateMany(exps)
   }
 
-  def fetchAllExoplanets(): doobie.ConnectionIO[List[Exoplanet]] = {
+  def fetchAllExoplanets: doobie.ConnectionIO[List[Exoplanet]] = {
     sql"""SELECT id, official_name, mass_jupiter, radius_jupiter,
           distance_pc, ra, dec, discovery_year FROM exoplanets
     """.query[Exoplanet].to[List]

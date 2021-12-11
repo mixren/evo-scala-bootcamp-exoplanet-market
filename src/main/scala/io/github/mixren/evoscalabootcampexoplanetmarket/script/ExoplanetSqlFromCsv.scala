@@ -4,8 +4,9 @@ import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.github.tototoshi.csv.CSVReader
 import doobie.hikari.HikariTransactor
 import io.github.mixren.evoscalabootcampexoplanetmarket.DbQueries._
-import io.github.mixren.evoscalabootcampexoplanetmarket.{DbTransactor, Exoplanet}
+import io.github.mixren.evoscalabootcampexoplanetmarket.DbTransactor
 import doobie.implicits._
+import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet
 
 import java.io.File
 
@@ -56,7 +57,7 @@ object ExoplanetSqlFromCsv extends IOApp {
       _             <- IO.delay(println(exoplanets.head.toString))
       nIns          <- transactor.use(insertExoplanets(exoplanets).transact[IO])
       _             <- IO.delay(println(s"Inserted rows: $nIns"))
-      l             <- transactor.use(fetchAllExoplanets().transact[IO])
+      l             <- transactor.use(fetchAllExoplanets.transact[IO])
       _             <- IO.delay((List(0, 10, 30) collect l).foreach(println))
     } yield ExitCode.Success
 }
