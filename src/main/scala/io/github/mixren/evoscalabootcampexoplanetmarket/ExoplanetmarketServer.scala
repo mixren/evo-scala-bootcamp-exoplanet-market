@@ -11,7 +11,11 @@ import org.http4s.server.middleware.Logger
 object ExoplanetmarketServer {
 
   def stream[F[_]: Async]: Stream[F, Nothing] = {
-    val httpApp = ExoplanetmarketRoutes.fetchExoplanetsRoutes[F].orNotFound
+    val httpApp = (
+      ExoplanetmarketRoutes.fetchExoplanetsRoutes[F] <+>
+      ExoplanetmarketRoutes.authRoutes[F]
+      ).orNotFound
+
     // With Middlewares in place
     val finalHttpApp = Logger.httpApp(logHeaders = true, logBody = true)(httpApp)
 

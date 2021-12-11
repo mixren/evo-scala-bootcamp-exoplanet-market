@@ -36,6 +36,7 @@ populated from NASA Exoplanet Archive. Not used, just added here for completion.
 6) https://index.scala-lang.org/tototoshi/scala-csv/scala-csv/1.3.8?target=_3.x - CSV reading/writing library,
 handy for complex CSVs where commas are where not expected
 7) https://jwt.io/introduction - JSON Web Token based authentication
+8) https://jwt-scala.github.io/jwt-scala/jwt-circe.html - JWT usage with Circe codecs
 
 ## Current State
 - Quickstarted the http4s Server with "HelloWorld" endpoint.
