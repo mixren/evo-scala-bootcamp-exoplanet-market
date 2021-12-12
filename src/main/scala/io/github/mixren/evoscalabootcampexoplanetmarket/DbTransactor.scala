@@ -23,7 +23,7 @@ object DbTransactor {
     */
   def pooled[F[_]: Async]: Resource[F, HikariTransactor[F]] =
     for {
-      ce <- ExecutionContexts.fixedThreadPool[F](10)
+      ce <- ExecutionContexts.fixedThreadPool[F](dbThreadSize)
       xa <- HikariTransactor.newHikariTransactor[F](
         driverClassName = dbDriverName,
         url = dbUrl,
