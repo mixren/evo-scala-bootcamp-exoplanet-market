@@ -4,8 +4,8 @@ import cats.effect.{ExitCode, IO, IOApp}
 import com.github.tototoshi.csv.CSVReader
 import doobie.implicits._
 import io.github.mixren.evoscalabootcampexoplanetmarket.DbTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.ExoplanetsDbQueries._
-import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetsDbQueries._
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.Exoplanet
 
 import java.io.File
 

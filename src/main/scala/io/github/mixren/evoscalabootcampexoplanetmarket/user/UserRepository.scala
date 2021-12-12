@@ -1,10 +1,8 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.repository
+package io.github.mixren.evoscalabootcampexoplanetmarket.user
 
 import cats.effect.Async
 import cats.implicits.catsSyntaxApplicativeError
 import doobie.hikari.HikariTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.UserDbQueries
-import io.github.mixren.evoscalabootcampexoplanetmarket.domain.{User, UserName}
 import doobie.implicits._
 
 import java.time.Instant
@@ -14,6 +12,7 @@ class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
   def userByName(userName: UserName): F[Either[Throwable, Option[User]]] = {
     UserDbQueries.fetchByName(userName).transact(xa).attempt
   }
+
   //
   //def addUser(value: User): Unit = ()
   //def deleteUser(value: User): Unit = ()
@@ -23,7 +22,7 @@ class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
     UserDbQueries.createTableUsersSql.transact(xa)
   }
 
-  def addUser(user: User, instant: Instant) = {
+  def addUser(user: User, instant: Instant): F[Either[Throwable, Int]] = {
     UserDbQueries.insertUser(user, instant).transact(xa).attempt
 
   }

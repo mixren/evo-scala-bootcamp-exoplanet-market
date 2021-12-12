@@ -1,11 +1,9 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.repository
+package io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet
 
 import cats.effect.Async
 import cats.implicits.catsSyntaxApplicativeError
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
-import io.github.mixren.evoscalabootcampexoplanetmarket.ExoplanetsDbQueries
-import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet
 
 
 class ExoplanetsRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {

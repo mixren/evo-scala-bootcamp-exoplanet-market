@@ -1,8 +1,7 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet
 
 import doobie.implicits._
 import doobie.util.update.Update
-import io.github.mixren.evoscalabootcampexoplanetmarket.domain.Exoplanet
 
 object ExoplanetsDbQueries {
   // private val table = "exoplanets"  <- TODO how to insert value into sql strings??

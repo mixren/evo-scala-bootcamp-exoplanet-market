@@ -5,6 +5,8 @@ import cats.syntax.all._
 import com.comcast.ip4s._
 import doobie.hikari.HikariTransactor
 import fs2.Stream
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRoutes
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.UserRoutes
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.middleware.Logger
@@ -14,8 +16,8 @@ object ExoplanetmarketServer {
   def stream[F[_]: Async](implicit xa: HikariTransactor[F]): Stream[F, Nothing] = {
 
     val httpApp = (
-      ExoplanetmarketRoutes.fetchExoplanetsRoutes[F] <+>
-      ExoplanetmarketRoutes.authRoutes[F]
+      ExoplanetRoutes.routes[F] <+>
+      UserRoutes.routes[F]
       ).orNotFound
 
     // With Middlewares in place

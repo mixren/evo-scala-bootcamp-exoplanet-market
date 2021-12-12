@@ -1,9 +1,10 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.utils
 
-import java.time.Instant
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.User
 import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
 import io.circe.syntax.EncoderOps
-import io.github.mixren.evoscalabootcampexoplanetmarket.domain.User
+
+import java.time.Instant
 
 object JwtHelper {
 
@@ -12,6 +13,7 @@ object JwtHelper {
 
   /**
    * Uses external library.
+   *
    * @param user Login user
    * @return JWT token, which of form:
    *         "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.

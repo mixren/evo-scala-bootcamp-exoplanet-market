@@ -1,10 +1,7 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.user
 
 import doobie.implicits._
-import io.github.mixren.evoscalabootcampexoplanetmarket.domain.{User, UserName}
-
 import java.time.Instant
-
 
 object UserDbQueries {
 
