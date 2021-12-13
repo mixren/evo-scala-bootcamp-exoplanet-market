@@ -50,7 +50,7 @@ object UserRoutes {
         for {
           user      <- req.as[User]
           userO     <- repo.userByName(user.userName)
-          success   <- repo.addUser(user, Instant.now())
+          success   <- userO.fold(fail)(repo.addUser(user, Instant.now()))
           response  <- if (success) BadRequest("can't add") else Ok(jwtEncode(user))
         } yield response*/
 

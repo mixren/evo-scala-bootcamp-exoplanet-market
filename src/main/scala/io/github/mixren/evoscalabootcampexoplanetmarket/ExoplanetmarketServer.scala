@@ -7,6 +7,7 @@ import doobie.hikari.HikariTransactor
 import fs2.Stream
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRoutes
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.UserRoutes
+import io.github.mixren.evoscalabootcampexoplanetmarket.MyAuthMiddleware
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.middleware.Logger
@@ -15,9 +16,12 @@ object ExoplanetmarketServer {
 
   def stream[F[_]: Async](implicit xa: HikariTransactor[F]): Stream[F, Nothing] = {
 
+    val middleware = new MyAuthMiddleware
+
     val httpApp = (
       ExoplanetRoutes.routes[F] <+>
-      UserRoutes.routes[F]
+      UserRoutes.routes[F] <+>
+      middleware(UserRoutes.authRoutes)
       ).orNotFound
 
     // With Middlewares in place
