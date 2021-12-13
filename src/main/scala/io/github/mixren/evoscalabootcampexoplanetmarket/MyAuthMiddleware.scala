@@ -1,16 +1,20 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
-import cats.data._
-import cats.effect._
-import cats.implicits._
+import cats.data.{Kleisli, OptionT}
+import cats.effect.Async
+import cats.syntax.applicative._
+import cats.syntax.either._
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.User
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.JwtHelper._
-import org.http4s.dsl.io._
 import org.http4s.headers.Authorization
 import org.http4s.server._
 import org.http4s._
+import org.http4s.dsl.Http4sDsl
 
 class MyAuthMiddleware[F[_]: Async] {
+
+  val dsl = new Http4sDsl[F] {}
+  import dsl._
 
   // TODO DO NOT ENCODE User password, password should be kept as hash and not used anywhere beside logging
   // TODO I'd suggest return UserName here only
@@ -32,7 +36,7 @@ class MyAuthMiddleware[F[_]: Async] {
 
 
   val onFailure: AuthedRoutes[String, F] = Kleisli(req => OptionT.liftF(Forbidden(req.context)))
-  private val middleware = AuthMiddleware(authUser, onFailure)
+  private val middleware: AuthMiddleware[F, User] = AuthMiddleware(authUser, onFailure)
 
   def apply(authedService: AuthedRoutes[User, F]): HttpRoutes[F] = middleware(authedService)
 

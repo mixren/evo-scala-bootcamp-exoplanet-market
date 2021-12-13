@@ -13,7 +13,7 @@ object JwtHelper {
   implicit val clock: Clock = Clock.systemUTC
   private val key = "secretKey"
   private val algo = JwtAlgorithm.HS256
-  private val expirationSec = 24 * 3600
+  private val expirationSec: Long = 24 * 3600
 
   /**
    * Uses external library.
@@ -29,6 +29,11 @@ object JwtHelper {
     val claim = JwtClaim(content = userJson)
                   .issuedNow
                   .expiresIn(expirationSec)
+//    val claim = JwtClaim(
+//      content = userJson,
+//      expiration = Some(Instant.now.plusSeconds(expirationSec).getEpochSecond),
+//      issuedAt = Some(Instant.now.getEpochSecond)
+//    )
 
     // claim: JwtClaim = JwtClaim({userJson..}, None, None, None, Some(1791123256), None, Some(1633338496), None)
 

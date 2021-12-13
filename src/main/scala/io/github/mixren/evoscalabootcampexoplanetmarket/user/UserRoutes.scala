@@ -7,7 +7,7 @@ import org.http4s.{AuthedRoutes, HttpRoutes}
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
 
-import java.time.Instant
+//import java.time.Instant
 
 
 object UserRoutes {
@@ -47,6 +47,11 @@ object UserRoutes {
       // Register user. Return JWT if user is registered.
       /*case req @ POST -> Root / "user" / "register" =>
         // TODO make it work
+        for {
+          authReq     <- req.as[AuthRequest]
+          hash        <- crypt.hashpw(authReq.userPassword)
+
+        } yield result
         for {
           user      <- req.as[User]
           userO     <- repo.userByName(user.userName)
