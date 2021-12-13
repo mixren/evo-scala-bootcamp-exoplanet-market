@@ -1,15 +1,15 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
-import cats.effect.IO
-import io.github.mixren.evoscalabootcampexoplanetmarket.domain.{Dec, Distance, Exoplanet, OfficialName, Ra, Radius, Year}
-import io.github.mixren.evoscalabootcampexoplanetmarket.todelete.{DefRoutes, HelloWorld}
-import munit.CatsEffectSuite
-import org.http4s._
-import org.http4s.implicits._
+//import cats.effect.IO
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.{Dec, Distance, Exoplanet, OfficialName, Ra, Radius, Year}
+//import io.github.mixren.evoscalabootcampexoplanetmarket.todelete.{DefRoutes, HelloWorld}
+//import munit.CatsEffectSuite
+//import org.http4s._
+//import org.http4s.implicits._
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-class HelloWorldSpec extends CatsEffectSuite {
+/*class HelloWorldSpec extends CatsEffectSuite {
 
   test("HelloWorld returns status code 200") {
     assertIO(retHelloWorld.map(_.status), Status.Ok)
@@ -25,7 +25,7 @@ class HelloWorldSpec extends CatsEffectSuite {
     DefRoutes.helloWorldRoutes(helloWorld).orNotFound(getHW)
   }
 
-}
+}*/
 
 class CodecsTest extends AnyWordSpec with Matchers {
   import io.circe.parser.decode

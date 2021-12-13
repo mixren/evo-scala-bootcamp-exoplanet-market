@@ -9,8 +9,8 @@ import java.time.Instant
 
 class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
 
-  def userByName(userName: UserName): F[Either[Throwable, Option[User]]] = {
-    UserDbQueries.fetchByName(userName).transact(xa).attempt
+  def userByName(userName: UserName): F[Option[User]] = {
+    UserDbQueries.fetchByName(userName).transact(xa)
   }
 
   //
