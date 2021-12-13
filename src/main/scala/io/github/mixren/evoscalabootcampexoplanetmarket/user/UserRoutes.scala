@@ -3,9 +3,11 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.user
 import cats.effect.Async
 import cats.implicits._
 import doobie.hikari.HikariTransactor
-import org.http4s.HttpRoutes
+import org.http4s.{AuthedRoutes, HttpRoutes}
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
+
+import java.time.Instant
 
 
 object UserRoutes {
@@ -18,39 +20,57 @@ object UserRoutes {
 
     HttpRoutes.of[F] {
 
-      // Call: curl http://localhost:8080/user/login -d '{"name": "John", "password": "123456"}' -H "Content-Type: application/json"
+      // Call: curl http://localhost:8080/user/login -d '{"userName": "John", "userPassword": "123456"}' -H "Content-Type: application/json"
       // Login user. Return JWT if user is registered, else error
       case req @ POST -> Root / "user" / "login" =>
-        req.as[User].flatMap { user =>
-          for {
-            userE     <- repo.userByName(user.userName)
-            response  <- userE match {  //TODO recheck the behaviour
-              case Left(throwable: Throwable)   => BadRequest(throwable.getMessage)
-              case Right(Some(user))            => Ok(jwtEncode(user))
-              case Right(None)                  => NoContent()
-            }
-          } yield response
-        }
+        // TODO add custom error message when header is wrong
+        for {
+          user      <- req.as[User]
+          userO     <- repo.userByName(user.userName)
+          response  <- userO match {
+            case Some(user)           => Ok(jwtEncode(user))
+            case _                    => NoContent()
+          }
+          // or: response  <- userO.fold(NoContent())(u => Ok(jwtEncode(u)))
+        } yield response
+//        req.as[User].flatMap { user =>
+//          for {
+//            userE     <- repo.userByName(user.userName)
+//            response  <- userE match {
+//              case Left(_)                      => BadRequest()
+//              case Right(Some(user))            => Ok(jwtEncode(user))
+//              case Right(None)                  => NoContent()
+//            }
+//          } yield response
 
       // Call: curl http://localhost:8080/user/register -d '{"name": "John", "password": "123456"}' -H "Content-Type: application/json"
       // Register user. Return JWT if user is registered.
       /*case req @ POST -> Root / "user" / "register" =>
-        req.as[User].flatMap { user =>
-          for {
-            userE <- transactor.use(xa => new UserRepository[F].userByName(user.userName))
-            response   <- userE match {
-              // TODO define the throwable for when user in table was not found
-              case Left(throwable: Throwable) => Ok()
-              case Right(_)                   => BadRequest("User with this username exists already")
-            }
-
-          } yield response
-        }*/
+        // TODO make it work
+        for {
+          user      <- req.as[User]
+          userO     <- repo.userByName(user.userName)
+          success   <- repo.addUser(user, Instant.now())
+          response  <- if (success) BadRequest("can't add") else Ok(jwtEncode(user))
+        } yield response*/
 
       // Call: curl http://localhost:8080/user/table/recreate
       // Recreate 'users' sql table
       case GET -> Root / "user" / "table" / "recreate" =>
         Ok(repo.recreateTable())
+
+    }
+  }
+
+  def authRoutes[F[_]: Async] = {
+    val dsl = new Http4sDsl[F] {}
+    import dsl._
+
+    AuthedRoutes.of[User, F] {
+
+      case GET -> Root / "loggedin" as user =>
+        Ok(s"${user.userName} is logged in")
+
     }
   }
 }
