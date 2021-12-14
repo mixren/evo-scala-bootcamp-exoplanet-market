@@ -28,7 +28,8 @@ lazy val root = (project in file("."))
       "org.tpolecat"    %% "doobie-specs2"        % "1.0.0-RC1", // Specs2 support for typechecking statements.
       "org.tpolecat"    %% "doobie-scalatest"     % "1.0.0-RC1", // ScalaTest support for typechecking statements.
       "com.github.tototoshi" %% "scala-csv"       % "1.3.8",     // Robust csv reader
-      "com.github.jwt-scala" %% "jwt-circe"       % "9.0.2"      // For JWT authentication
+      "com.github.jwt-scala" %% "jwt-circe"       % "9.0.2",      // For JWT authentication
+      "com.outr"       %% "hasher"                % "1.2.2"       // For password hashing
     ),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),

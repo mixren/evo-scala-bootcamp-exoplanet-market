@@ -29,12 +29,6 @@ object JwtHelper {
     val claim = JwtClaim(content = userJson)
                   .issuedNow
                   .expiresIn(expirationSec)
-//    val claim = JwtClaim(
-//      content = userJson,
-//      expiration = Some(Instant.now.plusSeconds(expirationSec).getEpochSecond),
-//      issuedAt = Some(Instant.now.getEpochSecond)
-//    )
-
     // claim: JwtClaim = JwtClaim({userJson..}, None, None, None, Some(1791123256), None, Some(1633338496), None)
 
     JwtCirce.encode(claim, key, algo)
@@ -43,6 +37,7 @@ object JwtHelper {
   def tokenDecode(token: String): Either[String, JwtClaim] = {
     JwtCirce.decode(token, key, Seq(algo)).toEither.leftMap(_ => "Error decoding jwt claim from token")
   }
+
 
   def verifyJwtClaims(jwtClaim: JwtClaim): Either[String, User] = {
     if (jwtClaim.isValid) {

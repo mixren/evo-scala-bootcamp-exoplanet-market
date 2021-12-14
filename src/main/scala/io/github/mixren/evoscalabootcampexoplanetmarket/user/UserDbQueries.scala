@@ -23,7 +23,7 @@ object UserDbQueries {
   def insertUser(user: User, instant: Instant): doobie.ConnectionIO[Int] =
     sql"""
           INSERT INTO users (username, password, registration_timestamp)
-            values (${user.userName}, ${user.userPassword}, ${instant.toEpochMilli})
+            values (${user.userName}, ${user.passwordHash}, ${instant.toEpochMilli})
     """.update.run
 
   def fetchByName(username: UserName): doobie.ConnectionIO[Option[User]] = {
