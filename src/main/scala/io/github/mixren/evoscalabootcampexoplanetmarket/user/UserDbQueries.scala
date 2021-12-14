@@ -27,7 +27,8 @@ object UserDbQueries {
     """.update.run
 
   def fetchByName(username: UserName): doobie.ConnectionIO[Option[User]] = {
-    sql"""SELECT username, password FROM users WHERE username = '$username'
-    """.query[User].option
+    sql"""SELECT username, password FROM users WHERE username = $username
+       """.query[User].option
+
   }
 }

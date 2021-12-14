@@ -12,14 +12,8 @@ class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
 
   def userByName(userName: UserName): EitherT[F, String, Option[User]] = {
     UserDbQueries.fetchByName(userName).transact(xa)
-      .attemptT.transform {
-      case Left(_: ArrayIndexOutOfBoundsException) => Right(Option.empty[User]): Either[String, Option[User]]
-      case Left(t)                                 => Left(s"Something is wrong with fetching from db. $t"): Either[String, Option[User]]
-      case Right(value)                            => Right(value): Either[String, Option[User]]
+      .attemptT.leftMap {t => s"Something is wrong with fetching from db. $t"}
     }
-    // Transform because if DB is empty the exception is thrown: ArrayIndexOutOfBoundsException
-    // But I want Option[User] to be None and catch other exceptions
-  }
 
   //def deleteUser(value: User): Unit = ()
 
