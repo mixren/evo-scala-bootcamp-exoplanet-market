@@ -22,11 +22,8 @@ object ExoplanetRoutes {
       // Return exoplanets as Json
       case GET -> Root / "exoplanets" / "all" =>
         for {
-          exoplanetsE <- repo.fetchAllExoplanets
-          response <- exoplanetsE match {
-            case Left(throwable: Throwable) => BadRequest(throwable.getMessage)
-            case Right(exoplanets) => Ok(exoplanets)
-          }
+          exoplanets <- repo.fetchAllExoplanets
+          response   <- Ok(exoplanets)
         } yield response
 
     }

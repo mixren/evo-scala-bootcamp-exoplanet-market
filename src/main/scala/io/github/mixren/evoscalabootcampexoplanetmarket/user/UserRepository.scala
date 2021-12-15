@@ -8,26 +8,32 @@ import doobie.implicits._
 
 import java.time.Instant
 
+// TODO mb add UserRepoService for handling logic
 class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
 
   def userByName(userName: UserName): EitherT[F, String, Option[User]] = {
-    UserDbQueries.fetchByName(userName).transact(xa)
-      .attemptT.leftMap {t => s"Something is wrong with fetching from db. $t"}
+    sql"""SELECT username, password FROM users WHERE username = $userName
+       """
+      .query[User]
+      .option
+      .transact(xa)
+      .attemptT
+      .leftMap {t => s"Something is wrong with fetching from db. $t"}
     }
 
   //def deleteUser(value: User): Unit = ()
 
-  def recreateTable(): F[Int] = {
-    //(UserDbQueries.dropTableUsers, UserDbQueries.createTableUsersSql).mapN(_ + _).transact(xa).attempt
-    UserDbQueries.createTableUsersSql.transact(xa)
-  }
 
   def createUser(user: User, instant: Instant): EitherT[F, String, User] = {
+    val insertSql = sql"""
+                      INSERT INTO users (username, password, registration_timestamp)
+                      values (${user.userName}, ${user.passwordHash}, ${instant.toEpochMilli})
+                      """
     for {
       userO   <- userByName(user.userName)
       result  <- userO match {
         case Some(usr) => EitherT.leftT[F, User](s"User ${usr.userName.value} already exists")
-        case None      => UserDbQueries.insertUser(user, instant).transact(xa)
+        case None      => insertSql.update.run.transact(xa)
           .attemptT.leftMap(_.getMessage).map(_ => user)
       }
     } yield result

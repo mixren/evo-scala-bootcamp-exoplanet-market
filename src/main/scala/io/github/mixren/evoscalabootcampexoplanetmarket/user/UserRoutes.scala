@@ -61,11 +61,6 @@ object UserRoutes {
         }
 
 
-      // Call: curl http://localhost:8080/user/table/recreate
-      // Recreate 'users' sql table
-      case GET -> Root / "user" / "table" / "recreate" =>
-        Ok(repo.recreateTable())
-
     }
   }
 

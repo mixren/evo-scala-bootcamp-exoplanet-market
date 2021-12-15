@@ -2,10 +2,9 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.script
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.github.tototoshi.csv.CSVReader
-import doobie.implicits._
 import io.github.mixren.evoscalabootcampexoplanetmarket.DbTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetsDbQueries._
-import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.Exoplanet
+import io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator.FlywayMigrator
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.{Exoplanet, ExoplanetsRepository}
 
 import java.io.File
 
@@ -42,22 +41,23 @@ object ExoplanetSqlFromCsv extends IOApp {
       }
     }
 
-
+  val dbMigrator = new FlywayMigrator[IO]
 
   override def run(args: List[String]): IO[ExitCode] = {
-    DbTransactor.pooled[IO].use { xa =>
+    DbTransactor.pooled[IO].use { implicit xa =>
+      val repo = new ExoplanetsRepository[IO]
       for {
-        _ <- dropTableExoplanets.transact[IO](xa)
-        _ <- createTableExoplanetsSql.transact[IO](xa)
+        _ <- dbMigrator.migrate()
+        _ <- repo.deleteAllExoplanets()
         data <- parseCsv("src/main/resources/exoplanet.eu_catalog.csv")
         //_             <- IO.delay(data(0).foreach(println))
         filteredData <- filter(data)
         //_             <- IO.delay((List(0, 10, 30) collect filteredData).foreach(l => println(l.mkString(", "))))
         exoplanets <- generateExoplanets(filteredData)
         _ <- IO.delay(println(exoplanets.head.toString))
-        nIns <- insertExoplanets(exoplanets).transact[IO](xa)
+        nIns <- repo.insertExoplanets(exoplanets)
         _ <- IO.delay(println(s"Inserted rows: $nIns"))
-        l <- fetchAllExoplanets.transact[IO](xa)
+        l <- repo.fetchAllExoplanets
         _ <- IO.delay((List(0, 10, 30) collect l).foreach(println))
       } yield ExitCode.Success
     }
