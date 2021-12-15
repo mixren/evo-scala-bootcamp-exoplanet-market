@@ -38,6 +38,7 @@ populated from NASA Exoplanet Archive. Not used, just added here for completion.
 handy for complex CSVs where commas are where not expected
 8) https://jwt.io/introduction - JSON Web Token based authentication
 9) https://jwt-scala.github.io/jwt-scala/jwt-circe.html - JWT usage with Circe codecs
+10) https://flywaydb.org/documentation/concepts/migrations.html - DB migrations. Useful for DB consistency and transparency.
 
 ## Current State
 - Quickstarted the http4s Server with "HelloWorld" endpoint.
@@ -46,6 +47,8 @@ handy for complex CSVs where commas are where not expected
 - Now I can read .csv, filter and convert it to objects
 - Now I can save objets to the local sql db using Doobie. My database is src/sql/exoplanets.db
 - Have a route, which reads DB and returns exoplanets as JSON
+- Authentication is enabled using JWT stateless method.
+- DB migrations is added
 
 ### To do:
-1) Implement user authentication
+1) Begin with the app backbone - exoplanets purchases
