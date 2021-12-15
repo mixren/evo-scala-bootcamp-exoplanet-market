@@ -1,7 +1,7 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
 import cats.effect.{ExitCode, IO, IOApp}
-import io.github.mixren.evoscalabootcampexoplanetmarket.DbMigrator.FlywayMigrator
+import io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator.FlywayMigrator
 
 
 object Main extends IOApp {

@@ -75,12 +75,7 @@ object UserRoutes {
 
     AuthedRoutes.of[User, F] {
       // TODO How to call this route?
-      // curl \
-      //  --header "Content-Type: application/json" \
-      //  --header "Authorization: Basic $AUTH" \
-      //  --request POST \
-      //  --data  '{"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Mzk1MzEyODIsImlhdCI6MTYzOTQ0NDg4MiwidXNlck5hbWUiOiJKb2huIiwicGFzc3dvcmRIYXNoIjoiOGQ5NjllZWY2ZWNhZDNjMjlhM2E2MjkyODBlNjg2Y2YwYzNmNWQ1YTg2YWZmM2NhMTIwMjBjOTIzYWRjNmM5MiJ9.GNxda6YOehliG4RF6G-RGWb_YFBd0GG4zOwL5vZBQYI"}' \
-      //  http://localhost:8080/auth/loggedin
+      // curl --location --request GET 'http://localhost:8080/auth/loggedin' \ --header 'Authorization: Bearer MTEwNiwidXNlck5hbWUiOiJKb2huIiwicGFzc3dvcmRIYXNoIjoiOGQ5NjllZWY2ZWNhZDNjMjlhM2E2MjkyODBlNjg2Y2YwYzNmNWQ1YTg2YWZmM2NhMTIwMjBjOTIzYWRjNmM5MiJ9.Ogxi77p8uDTNuMumafXb-17A1S2r5SvFN5huxH7hMH0'
       // Check if user is logged in by passing JWT token.
       case GET -> Root / "auth" / "loggedin" as user =>
         Ok(s"${user.userName} is logged in")

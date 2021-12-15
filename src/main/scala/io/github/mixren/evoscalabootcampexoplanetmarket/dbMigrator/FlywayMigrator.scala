@@ -1,8 +1,9 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.DbMigrator
+package io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator
 
 import cats.effect.{Async, Sync}
 import io.github.mixren.evoscalabootcampexoplanetmarket.DbConfig._
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.output.MigrateResult
 
 class FlywayMigrator[F[_]: Async] {
   val flyway: Flyway = Flyway
@@ -11,6 +12,6 @@ class FlywayMigrator[F[_]: Async] {
     .locations(dbMigrationLocation)
     .load()
 
-  def migrate(): F[Int] = Sync[F].delay(flyway.migrate())
+  def migrate(): F[MigrateResult] = Sync[F].delay(flyway.migrate())
 
 }

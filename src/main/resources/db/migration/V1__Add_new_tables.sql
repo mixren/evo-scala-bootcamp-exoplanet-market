@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     registration_timestamp    LONG    NOT NULL
 );
 
+
 --create table IF NOT EXISTS purchases (
 --    id                      INTEGER NOT NULL,
 --    exoplanet_official_name VARCHAR NOT NULL,
