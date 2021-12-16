@@ -5,10 +5,11 @@ import cats.effect.Async
 import cats.implicits.catsSyntaxApplicativeError
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{User, UserName}
 
 import java.time.Instant
 
-// TODO mb add UserRepoService for handling logic
+// TODO mb add UserRepoHandler for handling logic
 class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
 
   def userByName(userName: UserName): EitherT[F, String, Option[User]] = {

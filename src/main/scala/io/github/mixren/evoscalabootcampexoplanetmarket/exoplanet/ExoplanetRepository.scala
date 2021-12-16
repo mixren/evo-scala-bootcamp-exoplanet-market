@@ -4,9 +4,10 @@ import cats.effect.Async
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.update.Update
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.Exoplanet
 
-
-class ExoplanetsRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
+// TODO add ExoplanetHandler for the repository logic?
+class ExoplanetRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
   def insertExoplanets(exps: List[Exoplanet]): F[Int] = {
     val sql = """
                 |INSERT INTO exoplanets(

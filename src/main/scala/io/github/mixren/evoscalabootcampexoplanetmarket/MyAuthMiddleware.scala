@@ -4,7 +4,7 @@ import cats.data.{Kleisli, OptionT}
 import cats.effect.Async
 import cats.syntax.applicative._
 import cats.syntax.either._
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.User
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.User
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.JwtHelper._
 import org.http4s.headers.Authorization
 import org.http4s.server._
@@ -21,7 +21,7 @@ class MyAuthMiddleware[F[_]: Async] {
   private val authUser = Kleisli[F, Request[F], Either[String, User]] { req => {
     for {
       token <- getToken(req)
-      jwt   <- tokenDecode(token)
+      jwt   <- tokenDecode(JWToken(token))
       user  <- verifyJwtClaims(jwt)
     } yield user
   }.pure[F]

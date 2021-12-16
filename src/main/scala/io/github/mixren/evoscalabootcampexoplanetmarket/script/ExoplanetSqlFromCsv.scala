@@ -3,8 +3,9 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.script
 import cats.effect.{ExitCode, IO, IOApp}
 import com.github.tototoshi.csv.CSVReader
 import io.github.mixren.evoscalabootcampexoplanetmarket.DbTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator.FlywayMigrator
-import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.{Exoplanet, ExoplanetsRepository}
+import io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator.FlywayDatabaseMigrator
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.Exoplanet
 
 import java.io.File
 
@@ -41,11 +42,11 @@ object ExoplanetSqlFromCsv extends IOApp {
       }
     }
 
-  val dbMigrator = new FlywayMigrator[IO]
+  val dbMigrator = new FlywayDatabaseMigrator[IO]
 
   override def run(args: List[String]): IO[ExitCode] = {
     DbTransactor.pooled[IO].use { implicit xa =>
-      val repo = new ExoplanetsRepository[IO]
+      val repo = new ExoplanetRepository[IO]
       for {
         _ <- dbMigrator.migrate()
         _ <- repo.deleteAllExoplanets()

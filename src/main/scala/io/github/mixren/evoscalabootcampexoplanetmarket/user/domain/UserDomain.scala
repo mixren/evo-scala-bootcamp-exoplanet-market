@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.user
+package io.github.mixren.evoscalabootcampexoplanetmarket.user.domain
 
 import cats.effect.Concurrent
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}

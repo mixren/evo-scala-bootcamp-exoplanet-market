@@ -1,12 +1,12 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
 import cats.effect.{ExitCode, IO, IOApp}
-import io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator.FlywayMigrator
+import io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator.FlywayDatabaseMigrator
 
 
 object Main extends IOApp {
 
-  val dbMigrator = new FlywayMigrator[IO]
+  val dbMigrator = new FlywayDatabaseMigrator[IO]
 
   def run(args: List[String]): IO[ExitCode] = {
     DbTransactor.pooled[IO].use { implicit xa =>

@@ -4,6 +4,7 @@ import cats.effect.Concurrent
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{PasswordHash, User, UserName}
 import org.http4s.{EntityDecoder, EntityEncoder}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
 

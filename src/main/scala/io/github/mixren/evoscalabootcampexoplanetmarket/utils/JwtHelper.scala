@@ -3,7 +3,8 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.utils
 import cats.implicits._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.User
+import io.github.mixren.evoscalabootcampexoplanetmarket.JWToken
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.User
 import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
 
 import java.time.Clock
@@ -24,18 +25,16 @@ object JwtHelper {
    *         eyJleHAiOjE3OTExMjMyNTYsImlhdCI6MTYzMzMzODQ5Nn0.
    *         mvDSTVzGgZvhBf6Iw7zdijJ3bFozj9UeJkelFyr-pws"
    */
-  def jwtEncode(user: User): String = {
+  def jwtEncode(user: User): JWToken = {
     val userJson = user.asJson.noSpaces
     val claim = JwtClaim(content = userJson)
                   .issuedNow
                   .expiresIn(expirationSec)
-    // claim: JwtClaim = JwtClaim({userJson..}, None, None, None, Some(1791123256), None, Some(1633338496), None)
-
-    JwtCirce.encode(claim, key, algo)
+    JWToken(JwtCirce.encode(claim, key, algo))
   }
 
-  def tokenDecode(token: String): Either[String, JwtClaim] = {
-    JwtCirce.decode(token, key, Seq(algo)).toEither.leftMap(_ => "Error decoding jwt claim from token")
+  def tokenDecode(token: JWToken): Either[String, JwtClaim] = {
+    JwtCirce.decode(token.value, key, Seq(algo)).toEither.leftMap(_ => "Error decoding jwt claim from token")
   }
 
 

@@ -5,7 +5,7 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.DbConfig._
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 
-class FlywayMigrator[F[_]: Async] {
+class FlywayDatabaseMigrator[F[_]: Async] {
   val flyway: Flyway = Flyway
     .configure()
     .dataSource(dbUrl, dbUser, dbPwd)
