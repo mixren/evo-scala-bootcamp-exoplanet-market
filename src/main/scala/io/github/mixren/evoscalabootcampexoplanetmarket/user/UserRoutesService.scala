@@ -3,10 +3,10 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.user
 import cats.data.EitherT
 import cats.effect.Async
 import cats.implicits.catsSyntaxApplicativeError
-import io.github.mixren.evoscalabootcampexoplanetmarket.JWToken
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.PasswordHash
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.HashGenerator
-import io.github.mixren.evoscalabootcampexoplanetmarket.utils.JwtHelper.jwtEncode
+import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JWToken
+import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JwtHelper.jwtEncode
 
 import java.time.Instant
 

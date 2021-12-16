@@ -1,11 +1,11 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.utils
+package io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken
 
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.User
+import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
 import cats.implicits._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-import io.github.mixren.evoscalabootcampexoplanetmarket.JWToken
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.User
-import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
+
 
 import java.time.Clock
 
@@ -28,8 +28,8 @@ object JwtHelper {
   def jwtEncode(user: User): JWToken = {
     val userJson = user.asJson.noSpaces
     val claim = JwtClaim(content = userJson)
-                  .issuedNow
-                  .expiresIn(expirationSec)
+      .issuedNow
+      .expiresIn(expirationSec)
     JWToken(JwtCirce.encode(claim, key, algo))
   }
 

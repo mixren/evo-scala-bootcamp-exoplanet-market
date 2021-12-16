@@ -5,7 +5,8 @@ import cats.effect.Async
 import cats.syntax.applicative._
 import cats.syntax.either._
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.User
-import io.github.mixren.evoscalabootcampexoplanetmarket.utils.JwtHelper._
+import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JWToken
+import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JwtHelper._
 import org.http4s.headers.Authorization
 import org.http4s.server._
 import org.http4s._
