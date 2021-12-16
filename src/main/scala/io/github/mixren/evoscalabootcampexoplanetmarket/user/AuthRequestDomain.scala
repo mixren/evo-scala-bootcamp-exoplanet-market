@@ -2,11 +2,11 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.user
 
 import cats.effect.Concurrent
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.{Decoder, Encoder}
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{PasswordHash, User, UserName}
-import org.http4s.{EntityDecoder, EntityEncoder}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.{EntityDecoder, EntityEncoder}
 
 case class AuthRequest(
                         userName: UserName,
@@ -27,6 +27,19 @@ object AuthRequest{
 
 case class AuthPassword(value: String) extends AnyVal
 object AuthPassword {
+  // Validation works but doesnt display the error
+  /*def parse(str: String): Either[String, AuthPassword] =
+    if (str.length > 3) Right(AuthPassword(str))
+    else Left("Invalid password value. Password should have 4 or more symbols")
+
+  def parseUnsafe(str: String): AuthPassword =
+    parse(str).fold(error => throw new Exception(error), pwd => pwd)
+
+  private case class AuthPasswordHelper(value: String)
+
+  implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPasswordHelper].emapTry(helper =>
+    Try(parseUnsafe(helper.value))
+  )*/
   implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPassword]
   implicit val encode: Encoder[AuthPassword] = deriveUnwrappedEncoder[AuthPassword]
   implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, AuthPassword] = jsonOf
