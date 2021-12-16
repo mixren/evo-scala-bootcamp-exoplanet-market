@@ -52,3 +52,9 @@ handy for complex CSVs where commas are where not expected
 
 ### To do:
 1) Begin with the app backbone - exoplanets purchases
+I will need an AuthRoute for purchase requisition that would include: card(name, number, expiry, cvc),
+exoplanet official name, exoplanet new name.
+2) Card values validator
+3) Maybe add some generous offer - pay 2 for 3 names. Then Ill need to store this info somewhere.
+Might be unfair when all planets taken.
+4) 
