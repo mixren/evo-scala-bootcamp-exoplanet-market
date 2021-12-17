@@ -57,4 +57,4 @@ exoplanet official name, exoplanet new name.
 2) Card values validator
 3) Maybe add some generous offer - pay 2 for 3 names. Then Ill need to store this info somewhere.
 Might be unfair when all planets taken.
-4) 
+99) Fetch exoplanets .csv from http://exoplanet.eu/catalog/csv via routes
