@@ -1,0 +1,104 @@
+package io.github.mixren.evoscalabootcampexoplanetmarket
+
+import cats.effect.Concurrent
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
+import org.http4s.{EntityDecoder, EntityEncoder}
+import org.http4s.circe.{jsonEncoderOf, jsonOf}
+
+import java.text.SimpleDateFormat
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import scala.util.Try
+
+
+//card(name, number, expiry, cvc)
+case class Bankcard(
+                     cardHolderName: CardHolderName,
+                     cardNumber: CardNumber,
+                     cardExpiration: CardExpiration,
+                     cardCvc: CardCvc
+                   )
+object Bankcard{
+  implicit val decoder: Decoder[Bankcard] = deriveDecoder[Bankcard]
+  implicit val encoder: Encoder[Bankcard] = deriveEncoder[Bankcard]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, Bankcard] = jsonOf
+  implicit def entityEncoder[F[_]]:             EntityEncoder[F, Bankcard] = jsonEncoderOf
+}
+
+
+case class CardHolderName(value: String) extends AnyVal
+object CardHolderName{
+  def isValidName(str: String): Boolean =
+    (2 to 26 contains str.length) &&        // 2-26 chars
+    (str.trim.length == str.length) &&      // No spaces around
+    str.matches("^[A-z ]+$")         // Contain only spaces, upper and lower case letters
+  val strError: String = "Cardholder name should contain 2-26 chars." +
+    " It must contain only spaces, upper and lower case letters. It must not start or end with a space."
+  implicit val decoder: Decoder[CardHolderName] = deriveUnwrappedDecoder[CardHolderName].validate(
+    _.value.asString.fold(false)(isValidName),
+    strError
+  )
+  implicit val encoder: Encoder[CardHolderName] = deriveUnwrappedEncoder[CardHolderName]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardHolderName] = jsonOf
+  implicit def entityEncoder[F[_]]:             EntityEncoder[F, CardHolderName] = jsonEncoderOf
+}
+
+case class CardNumber(value: String) extends AnyVal
+object CardNumber{
+  def isValidNumber(str: String): Boolean =
+    (8 to 19 contains str.length) &&        // 8-19 chars
+    str(0) != '0' &&                        // Can't start with 0
+    str.matches("^[0-9]*$")          // Only digits
+  val strError = "Card number must contain between 8 and 19 digits (inclusive) and must not start with 0."
+  implicit val decoder: Decoder[CardNumber] = deriveUnwrappedDecoder[CardNumber].validate(
+    _.value.asString.fold(false)(isValidNumber),
+    strError
+  )
+  implicit val encoder: Encoder[CardNumber] = deriveUnwrappedEncoder[CardNumber]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardNumber] = jsonOf
+  implicit def entityEncoder[F[_]]:             EntityEncoder[F, CardNumber] = jsonEncoderOf
+}
+
+case class CardExpiration(value: YearMonth) extends AnyVal
+object CardExpiration{
+  // String format YYYY-MM, where MM ranges 01-12 and YYYY ranges 0001-9999.
+  // Expiration should not be in the past.
+  def isValidExpiration(str: String): Boolean = {
+    val dateFormat: String = "uuuu-MM"
+    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat)
+    if (str.nonEmpty && str.matches("^[0-9]{1,4}-(0[1-9]|1[012])$"))
+      Try(new SimpleDateFormat(dateFormat).parse(str)).toOption match {
+        case Some(_) =>
+          if (YearMonth.parse(str, dateTimeFormatter).compareTo(YearMonth.now()) >= 0) true
+          else false
+        case None => false
+      }
+    else false
+  }
+  val strError = "Card expiration should be of format YYYY-MM, where MM ranges 01-12, YYYY ranges 0001-9999 and not in the past."
+  implicit val decoder: Decoder[CardExpiration] = deriveUnwrappedDecoder[CardExpiration].validate(
+    _.value.asString.fold(false)(isValidExpiration),
+    strError
+  )
+  implicit val encoder: Encoder[CardExpiration] = deriveUnwrappedEncoder[CardExpiration]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardExpiration] = jsonOf
+  implicit def entityEncoder[F[_]]:             EntityEncoder[F, CardExpiration] = jsonEncoderOf
+}
+
+case class CardCvc(value: Int) extends AnyVal
+object CardCvc{
+  /*def isValidCvc(str: String): Boolean =
+    str.matches("^[0-9]{3,4}$")     // 3 or 4 digits*/
+  val strError = "Card CVC must contain between 3 and 4 digits (inclusive)."
+  // TODO fix decoder. In json {"cardCvc" : 123} validation returns false. dno why.
+  implicit val decoder: Decoder[CardCvc] = deriveUnwrappedDecoder[CardCvc].validate(
+    c => (3 to 4) contains c.value.asNumber.size,
+    strError
+  )
+  implicit val encoder: Encoder[CardCvc] = deriveUnwrappedEncoder[CardCvc]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardCvc] = jsonOf
+  implicit def entityEncoder[F[_]]:             EntityEncoder[F, CardCvc] = jsonEncoderOf
+}
+

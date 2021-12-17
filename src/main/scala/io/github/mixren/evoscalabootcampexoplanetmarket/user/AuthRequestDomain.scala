@@ -40,7 +40,13 @@ object AuthPassword {
   implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPasswordHelper].emapTry(helper =>
     Try(parseUnsafe(helper.value))
   )*/
-  implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPassword]
+  // Another validation method, same result
+  def isValidPassword(str: String): Boolean = str.length > 3
+  implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPassword].validate(
+    c => c.value.asString.fold(false)(isValidPassword),
+    "Invalid password value. Password should have 4 or more symbols"
+  )
+  //implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPassword]
   implicit val encode: Encoder[AuthPassword] = deriveUnwrappedEncoder[AuthPassword]
   implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, AuthPassword] = jsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, AuthPassword] = jsonEncoderOf
