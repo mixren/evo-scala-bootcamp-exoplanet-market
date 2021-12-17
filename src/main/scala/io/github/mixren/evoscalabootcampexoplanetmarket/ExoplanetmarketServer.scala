@@ -22,7 +22,7 @@ object ExoplanetmarketServer {
       ExoplanetRoutes.routes[F] <+>
       UserRoutes.routes[F] <+>
       PurchaseRoutes.routes[F] <+>
-      middleware(UserRoutes.authRoutes)
+      middleware(UserRoutes.authRoutes[F])
       ).orNotFound
 
     // With Middlewares in place
