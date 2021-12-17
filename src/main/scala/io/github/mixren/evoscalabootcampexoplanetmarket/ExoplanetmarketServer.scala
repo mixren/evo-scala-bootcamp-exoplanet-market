@@ -21,6 +21,7 @@ object ExoplanetmarketServer {
     val httpApp = (
       ExoplanetRoutes.routes[F] <+>
       UserRoutes.routes[F] <+>
+      PurchaseRoutes.routes[F] <+>
       middleware(UserRoutes.authRoutes)
       ).orNotFound
 

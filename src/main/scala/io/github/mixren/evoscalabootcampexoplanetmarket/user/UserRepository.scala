@@ -22,6 +22,15 @@ class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
       .leftMap {t => s"Something is wrong with fetching from db. $t"}
     }
 
+  def userByName2(userName: UserName) = {
+    sql"""SELECT username, password FROM users WHERE username = $userName
+       """
+      .query[User]
+      .option
+      .transact(xa)
+      .attempt
+  }
+
   //def deleteUser(value: User): Unit = ()
 
 

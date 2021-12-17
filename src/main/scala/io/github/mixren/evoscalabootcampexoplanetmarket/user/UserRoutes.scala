@@ -27,6 +27,12 @@ object UserRoutes {
           case Right(token)  => Ok(token)
           case Left(err)     => Conflict(s"$err")
         }
+        // Or smth like this? \/
+        /*(for {
+          authReq <- req.as[AuthRequest]
+          token <- routesService.userLogin2(authReq)
+          response <- Ok(token)
+        } yield response).handleErrorWith(_ => BadRequest())*/
 
 
       // Call: curl http://localhost:8080/user/register -d '{"userName": "John", "password": "123456"}' -H "Content-Type: application/json"
