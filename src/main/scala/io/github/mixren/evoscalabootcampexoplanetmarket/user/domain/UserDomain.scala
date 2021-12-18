@@ -21,19 +21,50 @@ object User{
 }
 
 
-case class UserName(value: String) extends AnyVal
+case class UserName private(value: String) extends AnyVal
 object UserName {
-  implicit val decode: Decoder[UserName] = deriveUnwrappedDecoder[UserName]
-  implicit val encode: Encoder[UserName] = deriveUnwrappedEncoder[UserName]
+  def isValidName(str: String): Boolean = str.trim.nonEmpty && str.trim.length == str.length
+
+  def of(value: String): Option[UserName] = value match {
+    case v if isValidName(v) => Some(UserName(v))
+    case _ => None
+  }
+
+  val strError: String = "Username invalid. Username should not be surrounded by spaces and be non-empty"
+  implicit val decoder: Decoder[UserName] = deriveUnwrappedDecoder[UserName].validate(
+    _.value.asString match {
+      case Some(value) => isValidName(value)
+      case None => false
+    },
+    strError
+  )
+  implicit val encoder: Encoder[UserName] = deriveUnwrappedEncoder[UserName]
   implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, UserName] = jsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, UserName] = jsonEncoderOf
 }
 
-case class PasswordHash(value: String) extends AnyVal
+
+case class PasswordHash private(value: String) extends AnyVal
 object PasswordHash {
-  implicit val decode: Decoder[PasswordHash] = deriveUnwrappedDecoder[PasswordHash]
-  implicit val encode: Encoder[PasswordHash] = deriveUnwrappedEncoder[PasswordHash]
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, PasswordHash] = jsonOf
-  implicit def entityEncoder[F[_]]:             EntityEncoder[F, PasswordHash] = jsonEncoderOf
+   def isValidPassword(str: String): Boolean = !str.contains(' ') && str.split(".").length == 3
+
+   def of(value: String): Option[PasswordHash] = value match {
+     case v if isValidPassword(v) => Some(PasswordHash(v))
+     case _ => None
+   }
+
+   val strError = "Invalid password hash value. Password hash should not contain spaces and have two \".\"."
+   implicit val decoder: Decoder[PasswordHash] = deriveUnwrappedDecoder[PasswordHash].validate(
+     _.value.asString match {
+       case Some(value) => isValidPassword(value)
+       case None => false
+     },
+     strError
+   )
+   implicit val encoder: Encoder[PasswordHash] = deriveUnwrappedEncoder[PasswordHash]
+
+   implicit def entityDecoder[F[_] : Concurrent]: EntityDecoder[F, PasswordHash] = jsonOf
+   implicit def entityEncoder[F[_]]: EntityEncoder[F, PasswordHash] = jsonEncoderOf
+
 }
 

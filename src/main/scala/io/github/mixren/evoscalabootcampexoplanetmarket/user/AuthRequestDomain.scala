@@ -25,32 +25,30 @@ object AuthRequest{
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, AuthRequest] = jsonEncoderOf
 }
 
-case class AuthPassword(value: String) extends AnyVal
+
+case class AuthPassword private(value: String) extends AnyVal
 object AuthPassword {
-  // Validation works but doesnt display the error
-  /*def parse(str: String): Either[String, AuthPassword] =
-    if (str.length > 3) Right(AuthPassword(str))
-    else Left("Invalid password value. Password should have 4 or more symbols")
+  def isValidPassword(str: String): Boolean = str.length > 5 && !str.contains(' ')
 
-  def parseUnsafe(str: String): AuthPassword =
-    parse(str).fold(error => throw new Exception(error), pwd => pwd)
+  def of(value: String): Option[AuthPassword] = value match {
+    case v if isValidPassword(v) => Some(AuthPassword(v))
+    case _ => None
+  }
 
-  private case class AuthPasswordHelper(value: String)
-
-  implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPasswordHelper].emapTry(helper =>
-    Try(parseUnsafe(helper.value))
-  )*/
-  // Another validation method, same result
-  def isValidPassword(str: String): Boolean = str.length > 3
-  implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPassword].validate(
-    c => c.value.asString.fold(false)(isValidPassword),
-    "Invalid password value. Password should have 4 or more symbols"
+  val strError = "Invalid password value. Password should have 6 or more symbols and not contain spaces."
+  implicit val decoder: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPassword].validate(
+    _.value.asString match {
+      case Some(value) => isValidPassword(value)
+      case None => false
+    },
+    strError
   )
-  //implicit val decode: Decoder[AuthPassword] = deriveUnwrappedDecoder[AuthPassword]
-  implicit val encode: Encoder[AuthPassword] = deriveUnwrappedEncoder[AuthPassword]
+  implicit val encoder: Encoder[AuthPassword] = deriveUnwrappedEncoder[AuthPassword]
+
   implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, AuthPassword] = jsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, AuthPassword] = jsonEncoderOf
 }
+
 
 //  final case class LoginRequest(
 //                                 userName: String,
