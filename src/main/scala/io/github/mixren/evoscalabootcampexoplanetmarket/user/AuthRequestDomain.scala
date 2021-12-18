@@ -10,7 +10,7 @@ import org.http4s.{EntityDecoder, EntityEncoder}
 
 case class AuthRequest(
                         userName: UserName,
-                        password: AuthPassword,
+                        password: AuthPassword
                       ) {
   def asUser(hashedPassword: PasswordHash): User = User(
     userName,
