@@ -28,10 +28,19 @@ object PurchaseRoutes {
 
     // TODO Display errors of malformed json parameters (e.g. if the card number is too short, show this in the error message)
     // Check Bankcard Codecs
-    // curl http://localhost:8080/user/login -d '{"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : 123}' -H "Content-Type: application/json"
+    // curl http://localhost:8080/purchase/exoplanet -d '{"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : 123}' -H "Content-Type: application/json"
     HttpRoutes.of[F] {
-      case req @ GET -> Root / "purchase" / "exoplanet" =>
-        req.as[Bankcard].flatMap(Ok(_))
+
+      // TODO Reserve an exoplanet before purchasing one.
+      //  Should include an expiration time for the purchase (~5 min), user who reserved it and exoplanet's official name
+      case req @ POST -> Root / "purchase" / "reserve" / "exoplanet" =>
+        req.as[BankCard].flatMap(Ok(_))
+
+      // TODO Check if planet is reserved by this user and carry on with banking service
+      case req @ POST -> Root / "purchase" / "exoplanet" =>
+        req.as[BankCard].flatMap(Ok(_)).handleErrorWith(t => BadRequest(t.getMessage))
+
+
     }
   }
 }

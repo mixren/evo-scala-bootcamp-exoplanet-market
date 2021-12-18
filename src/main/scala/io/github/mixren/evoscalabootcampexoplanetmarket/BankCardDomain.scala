@@ -14,17 +14,17 @@ import scala.util.Try
 
 
 //card(name, number, expiry, cvc)
-case class Bankcard(
+case class BankCard(
                      cardHolderName: CardHolderName,
                      cardNumber: CardNumber,
                      cardExpiration: CardExpiration,
                      cardCvc: CardCvc
                    )
-object Bankcard{
-  implicit val decoder: Decoder[Bankcard] = deriveDecoder[Bankcard]
-  implicit val encoder: Encoder[Bankcard] = deriveEncoder[Bankcard]
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, Bankcard] = jsonOf
-  implicit def entityEncoder[F[_]]:             EntityEncoder[F, Bankcard] = jsonEncoderOf
+object BankCard{
+  implicit val decoder: Decoder[BankCard] = deriveDecoder[BankCard]
+  implicit val encoder: Encoder[BankCard] = deriveEncoder[BankCard]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, BankCard] = jsonOf[F, BankCard]
+  implicit def entityEncoder[F[_]]:             EntityEncoder[F, BankCard] = jsonEncoderOf[F, BankCard]
 }
 
 
