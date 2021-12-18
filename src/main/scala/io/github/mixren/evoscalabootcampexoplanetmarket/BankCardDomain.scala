@@ -5,7 +5,7 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
 import org.http4s.{EntityDecoder, EntityEncoder}
-import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.circe.{accumulatingJsonOf, jsonEncoderOf}
 
 import java.text.SimpleDateFormat
 import java.time.YearMonth
@@ -13,7 +13,6 @@ import java.time.format.DateTimeFormatter
 import scala.util.Try
 
 
-//card(name, number, expiry, cvc)
 case class BankCard(
                      cardHolderName: CardHolderName,
                      cardNumber: CardNumber,
@@ -23,7 +22,7 @@ case class BankCard(
 object BankCard{
   implicit val decoder: Decoder[BankCard] = deriveDecoder[BankCard]
   implicit val encoder: Encoder[BankCard] = deriveEncoder[BankCard]
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, BankCard] = jsonOf[F, BankCard]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, BankCard] = accumulatingJsonOf[F, BankCard]
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, BankCard] = jsonEncoderOf[F, BankCard]
 }
 
@@ -51,7 +50,7 @@ object CardHolderName{
   )
   implicit val encoder: Encoder[CardHolderName] = deriveUnwrappedEncoder[CardHolderName]
 
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardHolderName] = jsonOf
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardHolderName] = accumulatingJsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, CardHolderName] = jsonEncoderOf
 }
 
@@ -77,7 +76,7 @@ object CardNumber{
   )
   implicit val encoder: Encoder[CardNumber] = deriveUnwrappedEncoder[CardNumber]
 
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardNumber] = jsonOf
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardNumber] = accumulatingJsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, CardNumber] = jsonEncoderOf
 }
 
@@ -112,7 +111,7 @@ object CardExpiration{
   )
   implicit val encoder: Encoder[CardExpiration] = deriveUnwrappedEncoder[CardExpiration]
 
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardExpiration] = jsonOf
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, CardExpiration] = accumulatingJsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, CardExpiration] = jsonEncoderOf
 }
 
@@ -136,7 +135,7 @@ object CardCvc {
   )
   implicit val encoder: Encoder[CardCvc] = deriveUnwrappedEncoder[CardCvc]
 
-  implicit def entityDecoder[F[_] : Concurrent]: EntityDecoder[F, CardCvc] = jsonOf
-  implicit def entityEncoder[F[_]]: EntityEncoder[F, CardCvc] = jsonEncoderOf
+  implicit def entityDecoder[F[_] : Concurrent]: EntityDecoder[F, CardCvc] = accumulatingJsonOf
+  implicit def entityEncoder[F[_]]:              EntityEncoder[F, CardCvc] = jsonEncoderOf
 }
 

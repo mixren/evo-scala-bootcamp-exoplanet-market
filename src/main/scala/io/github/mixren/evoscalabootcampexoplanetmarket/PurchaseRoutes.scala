@@ -38,7 +38,7 @@ object PurchaseRoutes {
 
       // TODO Check if planet is reserved by this user and carry on with banking service
       case req @ POST -> Root / "purchase" / "exoplanet" =>
-        req.as[BankCard].flatMap(Ok(_)).handleErrorWith(t => BadRequest(t.getMessage))
+        req.as[BankCard].flatMap(Ok(_)).handleErrorWith(t => BadRequest(t.getCause.getMessage))
 
 
     }

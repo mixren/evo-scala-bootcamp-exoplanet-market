@@ -5,7 +5,7 @@ import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrapped
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{PasswordHash, User, UserName}
-import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.circe.{jsonEncoderOf, accumulatingJsonOf}
 import org.http4s.{EntityDecoder, EntityEncoder}
 
 case class AuthRequest(
@@ -21,7 +21,7 @@ case class AuthRequest(
 object AuthRequest{
   implicit val decoder: Decoder[AuthRequest] = deriveDecoder[AuthRequest]
   implicit val encoder: Encoder[AuthRequest] = deriveEncoder[AuthRequest]
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, AuthRequest] = jsonOf
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, AuthRequest] = accumulatingJsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, AuthRequest] = jsonEncoderOf
 }
 
@@ -45,7 +45,7 @@ object AuthPassword {
   )
   implicit val encoder: Encoder[AuthPassword] = deriveUnwrappedEncoder[AuthPassword]
 
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, AuthPassword] = jsonOf
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, AuthPassword] = accumulatingJsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, AuthPassword] = jsonEncoderOf
 }
 
