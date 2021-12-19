@@ -12,7 +12,7 @@ import scala.util.Try
 
 // Some params are options because the original .csv file might not have these values (they are "")
 case class Exoplanet(id: Int,
-                     officialName: OfficialName,
+                     officialName: ExoplanetOfficialName,
                      mass: Option[Mass],
                      radius: Option[Radius],
                      distance: Option[Distance],
@@ -29,7 +29,7 @@ object Exoplanet {
                   distance: String, ra: String, dec: String, year: String): Exoplanet =
     new Exoplanet(
       id,
-      OfficialName(name),
+      ExoplanetOfficialName(name),
       Mass.fromString(mass),
       Radius.fromString(radius),
       Distance.fromString(distance),
@@ -46,12 +46,12 @@ object Exoplanet {
   }
 }*/
 
-case class OfficialName(name: String) extends AnyVal
-object OfficialName {
-  implicit val decode: Decoder[OfficialName] = deriveUnwrappedDecoder[OfficialName]
-  implicit val encode: Encoder[OfficialName] = deriveUnwrappedEncoder[OfficialName]
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, OfficialName] = jsonOf
-  implicit def entityEncoder[F[_]]:             EntityEncoder[F, OfficialName] = jsonEncoderOf
+case class ExoplanetOfficialName(name: String) extends AnyVal
+object ExoplanetOfficialName {
+  implicit val decode: Decoder[ExoplanetOfficialName] = deriveUnwrappedDecoder[ExoplanetOfficialName]
+  implicit val encode: Encoder[ExoplanetOfficialName] = deriveUnwrappedEncoder[ExoplanetOfficialName]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, ExoplanetOfficialName] = jsonOf
+  implicit def entityEncoder[F[_]]:             EntityEncoder[F, ExoplanetOfficialName] = jsonEncoderOf
 }
 
 

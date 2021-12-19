@@ -1,5 +1,6 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
+import cats.effect.kernel.Ref
 import cats.effect.{Async, Resource}
 import cats.syntax.all._
 import com.comcast.ip4s._
@@ -7,21 +8,21 @@ import doobie.hikari.HikariTransactor
 import fs2.Stream
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRoutes
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.UserRoutes
-import io.github.mixren.evoscalabootcampexoplanetmarket.MyAuthMiddleware
+import io.github.mixren.evoscalabootcampexoplanetmarket.utils.MapReservations.MapReservations
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.middleware.Logger
 
 object ExoplanetmarketServer {
 
-  def stream[F[_]: Async](implicit xa: HikariTransactor[F]): Stream[F, Nothing] = {
+  def stream[F[_]: Async](reservedExoplanets: Ref[F, MapReservations])(implicit xa: HikariTransactor[F]): Stream[F, Nothing] = {
 
     val middleware = new MyAuthMiddleware
 
     val httpApp = (
       ExoplanetRoutes.routes[F] <+>
       UserRoutes.routes[F] <+>
-      PurchaseRoutes.routes[F] <+>
+      PurchaseRoutes.routes[F](reservedExoplanets) <+>
       middleware(UserRoutes.authRoutes[F])
       ).orNotFound
 

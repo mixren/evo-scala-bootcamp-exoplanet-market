@@ -29,10 +29,10 @@ class CodecTest extends AnyWordSpec with Matchers {
       """{"id":1,"officialName":"11 Com b","mass":null,"radius":null,"distance":110.6,"ra":185.17917,"dec":17.792778,"discoveryYear":2008}"""
     )
     exoplanetDecoded1 must be(
-      Right(Exoplanet(13,OfficialName("6 Leo b"),None,Some(Radius(1.7)),Some(Distance(148.89)),Some(Ra(12.9675)),Some(Dec(-9.3554224)),Some(Year(2011))))
+      Right(Exoplanet(13,ExoplanetOfficialName("6 Leo b"),None,Some(Radius(1.7)),Some(Distance(148.89)),Some(Ra(12.9675)),Some(Dec(-9.3554224)),Some(Year(2011))))
     )
     exoplanetDecoded2 must be(
-      Right(Exoplanet(1,OfficialName("11 Com b"),None,None,Some(Distance(110.6)),Some(Ra(185.17917)),Some(Dec(17.792778)),Some(Year(2008))))
+      Right(Exoplanet(1,ExoplanetOfficialName("11 Com b"),None,None,Some(Distance(110.6)),Some(Ra(185.17917)),Some(Dec(17.792778)),Some(Year(2008))))
     )
   }
 }

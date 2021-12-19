@@ -4,7 +4,7 @@ import cats.effect.Async
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.update.Update
-import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.Exoplanet
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.{Exoplanet, ExoplanetOfficialName}
 
 // TODO add ExoplanetHandler for the repository logic?
 class ExoplanetRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
@@ -33,6 +33,15 @@ class ExoplanetRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
     sql"""DELETE FROM exoplanets""".update.run.transact(xa)
   }
 
+  def exoplanetByName(exoplanetName: ExoplanetOfficialName): F[Option[Exoplanet]] = {
+    sql"""SELECT id, official_name, mass_jupiter, radius_jupiter,
+          distance_pc, ra, dec, discovery_year FROM exoplanets
+          WHERE official_name = $exoplanetName
+       """
+      .query[Exoplanet]
+      .option
+      .transact(xa)
+  }
   /*def fetchExoplanets(number: Int): doobie.ConnectionIO[List[Exoplanet]] = {
     sql"""SELECT * FROM exoplanets"""
       .query[Exoplanet]
