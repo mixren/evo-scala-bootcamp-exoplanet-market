@@ -1,11 +1,11 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.db
+package io.github.mixren.evoscalabootcampexoplanetmarket.utils.db
 
 import cats.effect.{Async, Resource}
 import doobie.Transactor
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor.Aux
-import io.github.mixren.evoscalabootcampexoplanetmarket.db.DbConfig._
+import io.github.mixren.evoscalabootcampexoplanetmarket.utils.db.DbConfig._
 
 object DbTransactor {
 

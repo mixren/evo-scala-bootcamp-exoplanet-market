@@ -2,7 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.script
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.github.tototoshi.csv.CSVReader
-import io.github.mixren.evoscalabootcampexoplanetmarket.db.{DbTransactor, DbFlywayMigrator}
+import io.github.mixren.evoscalabootcampexoplanetmarket.utils.db.{DbTransactor, DbFlywayMigrator}
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.Exoplanet
 

@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.db
+package io.github.mixren.evoscalabootcampexoplanetmarket.utils.db
 
 import cats.effect.{Async, Sync}
 import DbConfig._
