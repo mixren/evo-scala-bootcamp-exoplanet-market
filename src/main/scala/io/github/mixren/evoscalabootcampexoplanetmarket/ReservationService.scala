@@ -3,25 +3,24 @@ package io.github.mixren.evoscalabootcampexoplanetmarket
 import cats.MonadThrow
 import cats.effect.kernel.{Async, Ref}
 import cats.implicits._
+import io.github.mixren.evoscalabootcampexoplanetmarket.MapReservations.MapReservations
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
-import MapReservations.MapReservations
 
 import scala.concurrent.duration.FiniteDuration
-import scala.util.control.NoStackTrace
 
 
 class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExoplanets: Ref[F, MapReservations]) {
 
-  private def success(exoplanetName: ExoplanetOfficialName, username: UserName, duration: FiniteDuration): Right[String, String] =
-    Right[String,String](s"Reservation successful. ${exoplanetName.name} is reserved by ${username.value} for ${duration.toCoarsest.toString()}.")
+  private def success(exoplanetName: ExoplanetOfficialName, username: UserName, duration: FiniteDuration): Either[String, String] =
+    s"Reservation successful. ${exoplanetName.name} is reserved by ${username.value} for ${duration.toCoarsest.toString()}.".asRight
 
-  private def failure(exoplanetName: ExoplanetOfficialName): Left[String, String] =
-    Left[String,String](s"Reservation failed. ${exoplanetName.name} is reserved by another user.")
+  private def failure(exoplanetName: ExoplanetOfficialName): Either[String, String] =
+    s"Reservation failed. ${exoplanetName.name} is reserved by another user.".asLeft
 
-  private def noEntry(exoplanetName: ExoplanetOfficialName): Left[String, String] =
-    Left[String,String](s"Reservation failed. Exoplanet ${exoplanetName.name} doesn't exist.")
+  private def noEntry(exoplanetName: ExoplanetOfficialName): Either[String, String] =
+    s"Reservation failed. Exoplanet ${exoplanetName.name} doesn't exist.".asLeft
 
   private def reserve(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration)=
     reservedExoplanets.modify{ state =>
@@ -51,14 +50,15 @@ class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExop
 
 
   /**
+   *  Verify reservation.
    *  Throws custom NoReservation error if no reservation. Otherwise extends reservation by the given amount.
    */
   def verifyReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration)(implicit M: MonadThrow[F]): F[Unit] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
-        case Some((sameUsername, _)) if sameUsername equals username  =>
+        case Some((sameUsername, deadline)) if (sameUsername equals username) && deadline.hasTimeLeft() =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), ())
-        case _                                                        =>
+        case _                                                                                          =>
           (state, NoReservationError(s"No $exoplanetName reservation for $username").raiseError)
       }
     }

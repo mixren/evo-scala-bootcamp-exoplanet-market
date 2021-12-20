@@ -47,17 +47,6 @@ object PurchaseRoutes {
       // Fail:    curl http://localhost:8080/purchase/reserve/exoplanet -d '{"exoplanetName" : "Hal Oh 5G", "username" : "Allah"}' -H "Content-Type: application/json"
       // Success: curl http://localhost:8080/purchase/reserve/exoplanet -d '{"exoplanetName" : "2I/Borisov", "username" : "Allah"}' -H "Content-Type: application/json"
       case req@POST -> Root / "purchase" / "reserve" / "exoplanet" =>
-        import cats.effect.Concurrent
-        import io.circe.Decoder
-        import io.circe.generic.semiauto.deriveDecoder
-        import org.http4s.EntityDecoder
-        import org.http4s.circe.accumulatingJsonOf
-
-        case class PairExonameUsername(exoplanetName: ExoplanetOfficialName, username: UserName)
-        implicit val decoder: Decoder[PairExonameUsername] = deriveDecoder[PairExonameUsername]
-
-        implicit def entityDecoder[G[_] : Concurrent]: EntityDecoder[G, PairExonameUsername] = accumulatingJsonOf[G, PairExonameUsername]
-
         for {
           pair <- req.as[PairExonameUsername]
           reserved <- reservationService.reserveExoplanet(pair.exoplanetName, pair.username, 5.minutes)
@@ -67,7 +56,7 @@ object PurchaseRoutes {
 
       // TODO Check if planet is reserved by this user and carry on with banking service
       // Purchase Exoplanet
-      // curl http://localhost:8080/purchase/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "2I/Borisov", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
+      // curl http://localhost:8080/purchase/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "new super name", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
       case req@POST -> Root / "purchase" / "exoplanet" =>
         /*req.as[PairExonameCard].flatMap(Ok(_)).handleErrorWith{
                                            case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)
