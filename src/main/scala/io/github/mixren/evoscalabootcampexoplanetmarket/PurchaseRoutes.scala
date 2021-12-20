@@ -12,7 +12,8 @@ import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
 import doobie.hikari.HikariTransactor
 import scala.concurrent.duration.DurationInt
-
+import java.time.Instant
+import org.http4s.InvalidMessageBodyFailure
 
 object PurchaseRoutes {
   // TODO AuthedRoute with with Bankcard, official exoplanet name and new exoplanet name.
@@ -32,11 +33,12 @@ object PurchaseRoutes {
   def routes[F[_]: Async](reservedExoplanets: Ref[F, MapReservations])(implicit xa: HikariTransactor[F]): HttpRoutes[F] = {
     val dsl = new Http4sDsl[F] {}
     import dsl._
-    val repo = new ExoplanetRepository[F]
-    val reservationService = new ReservationService[F](repo, reservedExoplanets)
+    val exoRepo = new ExoplanetRepository[F]
+    val purRepo = new PurchaseRepository[F]
+    val reservationService = new ReservationService[F](exoRepo, reservedExoplanets)
+    val purchaseService     = new PurchaseService[F](purRepo)
+    val bankingService     = new BankingServiceForTesting[F]
 
-    // TODO Display errors of malformed json parameters (e.g. if the card number is too short, show this in the error message)
-    // Check Bankcard Codecs
 
     HttpRoutes.of[F] {
 
@@ -62,22 +64,29 @@ object PurchaseRoutes {
 
 
       // TODO Check if planet is reserved by this user and carry on with banking service
-      // curl http://localhost:8080/purchase/exoplanet -d '{"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}' -H "Content-Type: application/json"
+      // Purchase Exoplanet
+      // curl http://localhost:8080/purchase/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "2I/Borisov", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
       case req @ POST -> Root / "purchase" / "exoplanet" =>
-        /*
-        import io.circe.parser.decodeAccumulating
-        import cats.data.Validated.{Invalid, Valid}
-        req.as[String].map(decodeAccumulating[BankCard]).flatMap{
-          case Valid(card)  => Ok(card)
-          case Invalid(err) => BadRequest(err.show)
-        }
-        */
-        //req.as[BankCard].flatMap(Ok(_)).handleErrorWith(t => BadRequest(t.getCause.getMessage))
-        import org.http4s.InvalidMessageBodyFailure
-        req.as[BankCard].flatMap(Ok(_)).handleErrorWith{
-          case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)
-          case o => BadRequest(o.getMessage)
-        }
+      /*req.as[PairExonameCard].flatMap(Ok(_)).handleErrorWith{
+                                           case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)
+                                           case o => BadRequest(o.getMessage)
+                                         }*/
+        (for {
+          quatro      <- req.as[QuatroExosUsrCard]
+          _           <- reservationService.verifyReservation(quatro.exoplanetName, quatro.username, 5.minute)
+          _           <- bankingService.makePayment(quatro.card, BigDecimal(4.99), SomeId("XXX555PPP"))
+          _           <- purchaseService.savePurchase(Purchase(quatro.exoplanetName,
+                                                               quatro.exoplanetNewName,
+                                                               quatro.username,
+                                                               PurchasePrice(BigDecimal(4.99)),
+                                                               Instant.now().toEpochMilli) )
+          _           <- reservationService.releaseReservation(quatro.exoplanetName, quatro.username)
+        } yield Ok(s"Exoplanet ${quatro.exoplanetName} is renamed to ${quatro.exoplanetNewName}") )
+          .handleErrorWith{
+            case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)
+            case t: ReservationError          => BadRequest(t)
+            case o                            => BadRequest(o.getMessage)
+          }
 
 
 

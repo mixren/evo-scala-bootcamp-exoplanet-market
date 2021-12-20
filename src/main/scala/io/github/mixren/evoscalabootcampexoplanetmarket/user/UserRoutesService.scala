@@ -12,8 +12,6 @@ import java.time.Instant
 
 class UserRoutesService[F[_]: Async](repo: UserRepository[F]) {
 
-  // TODO add authRequest Validator (password length >4 chars, username >3 chars)
-  //  Is it better to do it via codecs or when decoded?
   def userLogin(authRequest: F[AuthRequest]): EitherT[F, String, JWToken] =
     for {
       authReq     <- authRequest.attemptT.leftMap(t => t.getMessage)

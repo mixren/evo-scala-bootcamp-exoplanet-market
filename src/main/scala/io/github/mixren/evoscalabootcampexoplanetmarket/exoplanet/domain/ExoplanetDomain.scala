@@ -46,6 +46,7 @@ object Exoplanet {
   }
 }*/
 
+
 case class ExoplanetOfficialName(name: String) extends AnyVal
 object ExoplanetOfficialName {
   implicit val decode: Decoder[ExoplanetOfficialName] = deriveUnwrappedDecoder[ExoplanetOfficialName]
@@ -54,6 +55,13 @@ object ExoplanetOfficialName {
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, ExoplanetOfficialName] = jsonEncoderOf
 }
 
+case class ExoplanetNewName(value: String) extends AnyVal
+object ExoplanetNewName {
+  implicit val decode: Decoder[ExoplanetNewName] = deriveUnwrappedDecoder[ExoplanetNewName]
+  implicit val encode: Encoder[ExoplanetNewName] = deriveUnwrappedEncoder[ExoplanetNewName]
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, ExoplanetNewName] = jsonOf
+  implicit def entityEncoder[F[_]]:             EntityEncoder[F, ExoplanetNewName] = jsonEncoderOf
+}
 
 case class Mass(mass: Double) extends AnyVal
 object Mass {
