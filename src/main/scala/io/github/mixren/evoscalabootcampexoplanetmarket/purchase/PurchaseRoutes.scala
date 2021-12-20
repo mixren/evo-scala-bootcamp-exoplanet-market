@@ -82,7 +82,7 @@ object PurchaseRoutes {
                  quatro.username,
                  PurchasePrice(BigDecimal(4.99)),
                  Instant.now().toEpochMilli))
-          _      <- reservationService.releaseReservation(quatro.exoplanetName, quatro.username)
+          _      <- reservationService.releaseReservation(quatro.exoplanetName, quatro.username)      // TODO release it in any case!
           resp   <- Ok(s"Exoplanet ${quatro.exoplanetName} is renamed to ${quatro.exoplanetNewName}")
         } yield resp)
           .handleErrorWith {
