@@ -11,6 +11,7 @@ import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
 import doobie.hikari.HikariTransactor
+
 import scala.concurrent.duration.DurationInt
 import java.time.Instant
 import org.http4s.InvalidMessageBodyFailure
@@ -81,14 +82,13 @@ object PurchaseRoutes {
                                                                PurchasePrice(BigDecimal(4.99)),
                                                                Instant.now().toEpochMilli) )
           _           <- reservationService.releaseReservation(quatro.exoplanetName, quatro.username)
-        } yield Ok(s"Exoplanet ${quatro.exoplanetName} is renamed to ${quatro.exoplanetNewName}") )
-          .handleErrorWith{
+          resp        <- Ok(s"Exoplanet ${quatro.exoplanetName} is renamed to ${quatro.exoplanetNewName}")
+        } yield resp)
+          .handleErrorWith {
             case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)
-            case t: ReservationError          => BadRequest(t)
-            case o                            => BadRequest(o.getMessage)
+            case t: ReservationException => BadRequest(t.getMessage)
+            case o => BadRequest(o.getMessage)
           }
-
-
 
     }
   }

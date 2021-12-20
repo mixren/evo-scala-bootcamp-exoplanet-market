@@ -1,5 +1,6 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket
 
+import cats.MonadThrow
 import cats.effect.kernel.{Async, Ref}
 import cats.implicits._
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
@@ -8,8 +9,13 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.MapReservations.MapReservations
 
 import scala.concurrent.duration.FiniteDuration
+import scala.util.control.NoStackTrace
 
-class ReservationService[F[_]:Async](repo: ExoplanetRepository[F], reservedExoplanets: Ref[F, MapReservations]) {
+
+sealed abstract class ReservationException(message: String) extends Exception(message) with NoStackTrace
+case class NoReservationException(message: String) extends ReservationException(message)
+
+class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExoplanets: Ref[F, MapReservations]) {
 
   private def success(exoplanetName: ExoplanetOfficialName, username: UserName, duration: FiniteDuration): Right[String, String] =
     Right[String,String](s"Reservation successful. ${exoplanetName.name} is reserved by ${username.value} for ${duration.toCoarsest.toString()}.")
@@ -46,19 +52,17 @@ class ReservationService[F[_]:Async](repo: ExoplanetRepository[F], reservedExopl
     } yield res
   }
 
-  sealed trait ReservationError extends Exception
-  case class NoReservation(exoplanetName: ExoplanetOfficialName, username: UserName) extends ReservationError
 
   /**
    *  Throws custom NoReservation error if no reservation. Otherwise extends reservation by the given amount.
    */
-  def verifyReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Unit] =
+  def verifyReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration)(implicit M: MonadThrow[F]): F[Unit] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
         case Some((sameUsername, _)) if sameUsername equals username  =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), ())
         case _                                                        =>
-          (state, throw NoReservation(exoplanetName, username))
+          (state, NoReservationException(s"No $exoplanetName reservation for $username").raiseError)
       }
     }
 
