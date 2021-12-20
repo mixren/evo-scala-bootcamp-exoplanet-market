@@ -6,7 +6,7 @@ import cats.implicits._
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
-import io.github.mixren.evoscalabootcampexoplanetmarket.utils.MapReservations.MapReservations
+import MapReservations.MapReservations
 
 import scala.concurrent.duration.FiniteDuration
 import scala.util.control.NoStackTrace

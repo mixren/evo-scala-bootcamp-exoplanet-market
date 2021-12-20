@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.db
 
 object DbConfig {
   val dbDriverName = "org.sqlite.JDBC"

@@ -1,9 +1,10 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
 import cats.effect.Async
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.update.Update
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.Purchase
 
 class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
   def addPurchase(purchase: Purchase): F[Int] = {

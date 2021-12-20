@@ -2,8 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.script
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.github.tototoshi.csv.CSVReader
-import io.github.mixren.evoscalabootcampexoplanetmarket.DbTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator.FlywayDatabaseMigrator
+import io.github.mixren.evoscalabootcampexoplanetmarket.db.{DbTransactor, DbFlywayMigrator}
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.Exoplanet
 
@@ -42,7 +41,7 @@ object ExoplanetSqlFromCsv extends IOApp {
       }
     }
 
-  val dbMigrator = new FlywayDatabaseMigrator[IO]
+  val dbMigrator = new DbFlywayMigrator[IO]
 
   override def run(args: List[String]): IO[ExitCode] = {
     DbTransactor.pooled[IO].use { implicit xa =>

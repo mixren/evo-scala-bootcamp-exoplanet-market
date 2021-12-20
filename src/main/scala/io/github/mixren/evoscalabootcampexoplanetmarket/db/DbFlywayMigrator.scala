@@ -1,11 +1,11 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.dbMigrator
+package io.github.mixren.evoscalabootcampexoplanetmarket.db
 
 import cats.effect.{Async, Sync}
-import io.github.mixren.evoscalabootcampexoplanetmarket.DbConfig._
+import DbConfig._
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 
-class FlywayDatabaseMigrator[F[_]: Async] {
+class DbFlywayMigrator[F[_]: Async] {
   val flyway: Flyway = Flyway
     .configure()
     .dataSource(dbUrl, dbUser, dbPwd)
