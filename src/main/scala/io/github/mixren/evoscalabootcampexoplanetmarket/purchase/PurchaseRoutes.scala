@@ -4,16 +4,11 @@ import cats.effect.Async
 import cats.effect.kernel.Ref
 import cats.implicits._
 import doobie.hikari.HikariTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.MapReservations.MapReservations
-import io.github.mixren.evoscalabootcampexoplanetmarket._
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
-import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
-import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.{Purchase, PurchasePrice}
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.MapReservations.MapReservations
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{HttpRoutes, InvalidMessageBodyFailure}
 
-import java.time.Instant
 import scala.concurrent.duration.DurationInt
 
 object PurchaseRoutes {
@@ -37,8 +32,9 @@ object PurchaseRoutes {
     val exoRepo = new ExoplanetRepository[F]
     val purRepo = new PurchaseRepository[F]
     val reservationService = new ReservationService[F](exoRepo, reservedExoplanets)
-    val purchaseService = new PurchaseService[F](purRepo)
     val bankingService = new BankingServiceForTesting[F]
+    val purchaseService = new PurchaseService[F](reservationService, bankingService, purRepo)
+
 
 
     HttpRoutes.of[F] {
@@ -50,7 +46,10 @@ object PurchaseRoutes {
         for {
           pair <- req.as[PairExonameUsername]
           reserved <- reservationService.reserveExoplanet(pair.exoplanetName, pair.username, 5.minutes)
-          res <- Ok(reserved.toString)
+          res <- reserved match {
+            case Left(s)  => BadRequest(s)
+            case Right(s) => Ok(s)
+          }
         } yield res
 
 
@@ -64,19 +63,11 @@ object PurchaseRoutes {
                                          }*/
         (for {
           quatro <- req.as[QuatroExosUsrCard]
-          _      <- reservationService.verifyReservation(quatro.exoplanetName, quatro.username, 5.minute)
-          _      <- bankingService.makePayment(quatro.card, BigDecimal(4.99), SomeId("XXX555PPP"))
-          _      <- purchaseService.savePurchase(Purchase(quatro.exoplanetName,
-                 quatro.exoplanetNewName,
-                 quatro.username,
-                 PurchasePrice(BigDecimal(4.99)),
-                 Instant.now().toEpochMilli))
-          _      <- reservationService.releaseReservation(quatro.exoplanetName, quatro.username)      // TODO release it in any case!
+          res    <- purchaseService.makePurchase(quatro)
           resp   <- Ok(s"Exoplanet ${quatro.exoplanetName} is renamed to ${quatro.exoplanetNewName}")
         } yield resp)
           .handleErrorWith {
             case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)
-            case t: ReservationError => BadRequest(t.getMessage)
             case o => BadRequest(o.getMessage)
           }
 

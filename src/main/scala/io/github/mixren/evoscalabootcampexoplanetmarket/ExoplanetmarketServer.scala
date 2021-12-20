@@ -9,7 +9,7 @@ import fs2.Stream
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRoutes
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.PurchaseRoutes
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.UserRoutes
-import MapReservations.MapReservations
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.MapReservations.MapReservations
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.middleware.Logger

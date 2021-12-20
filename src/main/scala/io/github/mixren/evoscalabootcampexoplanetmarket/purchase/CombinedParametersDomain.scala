@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
 import cats.effect.Concurrent
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}

@@ -1,15 +1,21 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
-import cats.MonadThrow
 import cats.effect.kernel.{Async, Ref}
 import cats.implicits._
-import io.github.mixren.evoscalabootcampexoplanetmarket.MapReservations.MapReservations
+import MapReservations.MapReservations
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 
 import scala.concurrent.duration.FiniteDuration
 
+
+/*
+sealed trait ReservationResult
+object ReservationResult {
+  case class SpecificError(msg: String) extends Error
+}
+*/
 
 class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExoplanets: Ref[F, MapReservations]) {
 
@@ -53,13 +59,13 @@ class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExop
    *  Verify reservation.
    *  Throws custom NoReservation error if no reservation. Otherwise extends reservation by the given amount.
    */
-  def verifyReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration)(implicit M: MonadThrow[F]): F[Unit] =
+  def verifyReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
         case Some((sameUsername, deadline)) if (sameUsername equals username) && deadline.hasTimeLeft() =>
-          (state.updated(exoplanetName, (username, reservationDuration.fromNow)), ())
+          (state.updated(exoplanetName, (username, reservationDuration.fromNow)), "Reservation verified".asRight)
         case _                                                                                          =>
-          (state, NoReservationError(s"No $exoplanetName reservation for $username").raiseError)
+          (state, s"No $exoplanetName reservation for $username".asLeft)
       }
     }
 

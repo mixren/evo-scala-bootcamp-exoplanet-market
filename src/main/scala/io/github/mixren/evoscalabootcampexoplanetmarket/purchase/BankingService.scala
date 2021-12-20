@@ -1,8 +1,8 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket
+package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
 import cats.effect.Async
 import cats.implicits.catsSyntaxApply
-import io.github.mixren.evoscalabootcampexoplanetmarket.PaymentResult.Successful
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.PaymentResult.Successful
 
 import scala.concurrent.duration.DurationInt
 
