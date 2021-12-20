@@ -12,9 +12,6 @@ import scala.concurrent.duration.FiniteDuration
 import scala.util.control.NoStackTrace
 
 
-sealed abstract class ReservationException(message: String) extends Exception(message) with NoStackTrace
-case class NoReservationException(message: String) extends ReservationException(message)
-
 class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExoplanets: Ref[F, MapReservations]) {
 
   private def success(exoplanetName: ExoplanetOfficialName, username: UserName, duration: FiniteDuration): Right[String, String] =
@@ -62,7 +59,7 @@ class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExop
         case Some((sameUsername, _)) if sameUsername equals username  =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), ())
         case _                                                        =>
-          (state, NoReservationException(s"No $exoplanetName reservation for $username").raiseError)
+          (state, NoReservationError(s"No $exoplanetName reservation for $username").raiseError)
       }
     }
 

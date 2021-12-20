@@ -75,19 +75,19 @@ object PurchaseRoutes {
                                          }*/
         (for {
           quatro <- req.as[QuatroExosUsrCard]
-          _ <- reservationService.verifyReservation(quatro.exoplanetName, quatro.username, 5.minute)
-          _ <- bankingService.makePayment(quatro.card, BigDecimal(4.99), SomeId("XXX555PPP"))
-          _ <- purchaseService.savePurchase(Purchase(quatro.exoplanetName,
-            quatro.exoplanetNewName,
-            quatro.username,
-            PurchasePrice(BigDecimal(4.99)),
-            Instant.now().toEpochMilli))
-          _ <- reservationService.releaseReservation(quatro.exoplanetName, quatro.username)
-          resp <- Ok(s"Exoplanet ${quatro.exoplanetName} is renamed to ${quatro.exoplanetNewName}")
+          _      <- reservationService.verifyReservation(quatro.exoplanetName, quatro.username, 5.minute)
+          _      <- bankingService.makePayment(quatro.card, BigDecimal(4.99), SomeId("XXX555PPP"))
+          _      <- purchaseService.savePurchase(Purchase(quatro.exoplanetName,
+                 quatro.exoplanetNewName,
+                 quatro.username,
+                 PurchasePrice(BigDecimal(4.99)),
+                 Instant.now().toEpochMilli))
+          _      <- reservationService.releaseReservation(quatro.exoplanetName, quatro.username)
+          resp   <- Ok(s"Exoplanet ${quatro.exoplanetName} is renamed to ${quatro.exoplanetNewName}")
         } yield resp)
           .handleErrorWith {
             case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)
-            case t: ReservationException => BadRequest(t.getMessage)
+            case t: ReservationError => BadRequest(t.getMessage)
             case o => BadRequest(o.getMessage)
           }
 
