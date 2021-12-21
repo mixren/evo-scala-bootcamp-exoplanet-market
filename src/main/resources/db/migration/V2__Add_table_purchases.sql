@@ -1,11 +1,13 @@
 
-create table IF NOT EXISTS purchases (
+CREATE TABLE IF NOT EXISTS purchases (
     id                      INTEGER   AUTO_INCREMENT  PRIMARY KEY,
-    exoplanet_official_name TEXT      FOREIGN KEY REFERENCES exoplanets(official_name),
+    exoplanet_official_name TEXT      NOT NULL,
     exoplanet_bought_name   TEXT      NOT NULL,
-    username                TEXT      FOREIGN KEY REFERENCES users(username),
+    username                TEXT      NOT NULL,
     price                   TEXT      NOT NULL,
-    timestamp               LONG      NOT NULL
+    timestamp               LONG      NOT NULL,
+    FOREIGN KEY (exoplanet_official_name) REFERENCES exoplanets(official_name),
+    FOREIGN KEY (username)                REFERENCES users(username)
 );
 
 
