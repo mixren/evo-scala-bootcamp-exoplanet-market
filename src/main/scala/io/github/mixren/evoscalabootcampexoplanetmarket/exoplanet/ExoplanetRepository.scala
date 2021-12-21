@@ -6,7 +6,7 @@ import doobie.implicits._
 import doobie.util.update.Update
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.{Exoplanet, ExoplanetOfficialName}
 
-// TODO add ExoplanetHandler for the repository logic?
+
 class ExoplanetRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
   def insertExoplanets(exps: List[Exoplanet]): F[Int] = {
     val sql = """
@@ -42,13 +42,5 @@ class ExoplanetRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
       .option
       .transact(xa)
   }
-  /*def fetchExoplanets(number: Int): doobie.ConnectionIO[List[Exoplanet]] = {
-    sql"""SELECT * FROM exoplanets"""
-      .query[Exoplanet]
-      .stream
-      .take(number)
-      .compile
-      .toList
-  }*/
 
 }

@@ -17,7 +17,9 @@ object ReservationResult {
 }
 */
 
-class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExoplanets: Ref[F, MapReservations]) {
+class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
+                                      purRepo: PurchaseRepository[F],
+                                      reservedExoplanets: Ref[F, MapReservations]) {
 
   private def success(exoplanetName: ExoplanetOfficialName, username: UserName, duration: FiniteDuration): Either[String, String] =
     s"Reservation successful. ${exoplanetName.name} is reserved by ${username.value} for ${duration.toCoarsest.toString()}.".asRight
@@ -27,6 +29,9 @@ class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExop
 
   private def noEntry(exoplanetName: ExoplanetOfficialName): Either[String, String] =
     s"Reservation failed. Exoplanet ${exoplanetName.name} doesn't exist.".asLeft
+
+  private def purchasedAlready(exoplanetName: ExoplanetOfficialName): Either[String, String] =
+    s"Reservation failed. Exoplanet ${exoplanetName.name} is purchased already".asLeft
 
   private def reserve(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration)=
     reservedExoplanets.modify{ state =>
@@ -44,12 +49,15 @@ class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExop
    *  Reserve an exoplanet for a user.
    *  Is reserved only if the exoplanet exists and not reserved for another user at the moment
    */
+    // TODO bought planets cant be renamed!!!!! Done, but Check It!
   def reserveExoplanet(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]] = {
     for {
-      opt <- repo.exoplanetByName(exoplanetName)
-      res   <- opt match{
-        case Some(_)  => reserve(exoplanetName, username, reservationDuration)
-        case None     => Async[F].delay(noEntry(exoplanetName))
+      exoO  <- exoRepo.exoplanetByName(exoplanetName)
+      purO  <- purRepo.purchaseByExoOfficialName(exoplanetName)
+      res   <- List(exoO, purO).flatten match {
+        case List(_, _)  => Async[F].delay(purchasedAlready(exoplanetName))
+        case List(_)     => reserve(exoplanetName, username, reservationDuration)
+        case _           => Async[F].delay(noEntry(exoplanetName))
       }
     } yield res
   }
@@ -59,11 +67,11 @@ class ReservationService[F[_]: Async](repo: ExoplanetRepository[F], reservedExop
    *  Verify reservation.
    *  Throws custom NoReservation error if no reservation. Otherwise extends reservation by the given amount.
    */
-  def verifyReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]] =
+  def verifyReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
         case Some((sameUsername, deadline)) if (sameUsername equals username) && deadline.hasTimeLeft() =>
-          (state.updated(exoplanetName, (username, reservationDuration.fromNow)), "Reservation verified".asRight)
+          (state.updated(exoplanetName, (username, reservationDuration.fromNow)), ().asRight)
         case _                                                                                          =>
           (state, s"No $exoplanetName reservation for $username".asLeft)
       }

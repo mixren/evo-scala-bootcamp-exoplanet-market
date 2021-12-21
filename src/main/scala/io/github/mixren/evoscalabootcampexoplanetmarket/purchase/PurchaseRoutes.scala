@@ -31,7 +31,7 @@ object PurchaseRoutes {
     import dsl._
     val exoRepo = new ExoplanetRepository[F]
     val purRepo = new PurchaseRepository[F]
-    val reservationService = new ReservationService[F](exoRepo, reservedExoplanets)
+    val reservationService = new ReservationService[F](exoRepo, purRepo, reservedExoplanets)
     val bankingService = new BankingServiceForTesting[F]
     val purchaseService = new PurchaseService[F](reservationService, bankingService, purRepo)
 
@@ -64,10 +64,13 @@ object PurchaseRoutes {
         (for {
           quatro <- req.as[QuatroExosUsrCard]
           res    <- purchaseService.makePurchase(quatro)
-          resp   <- Ok(s"Exoplanet ${quatro.exoplanetName} is renamed to ${quatro.exoplanetNewName}")
+          resp   <- res match {
+            case Left(s)  => BadRequest(s)
+            case Right(s) => Ok(s)
+          }
         } yield resp)
           .handleErrorWith {
-            case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)
+            case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)    // For if Json values failed custom validation
             case o => BadRequest(o.getMessage)
           }
 
