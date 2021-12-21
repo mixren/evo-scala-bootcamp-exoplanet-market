@@ -47,17 +47,17 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
 
   /**
    *  Reserve an exoplanet for a user.
-   *  Is reserved only if the exoplanet exists and not reserved for another user at the moment
+   *  Is reserved only if the exoplanet exists, not purchased and not reserved for another user at the moment.
+   *  Re-reservation by the same user is possible.
    */
-    // TODO bought planets cant be renamed!!!!! Done, but Check It!
   def reserveExoplanet(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]] = {
     for {
       exoO  <- exoRepo.exoplanetByName(exoplanetName)
       purO  <- purRepo.purchaseByExoOfficialName(exoplanetName)
-      res   <- List(exoO, purO).flatten match {
-        case List(_, _)  => Async[F].delay(purchasedAlready(exoplanetName))
-        case List(_)     => reserve(exoplanetName, username, reservationDuration)
-        case _           => Async[F].delay(noEntry(exoplanetName))
+      res   <- (exoO.isDefined, purO.isDefined) match {
+        case (true, true)  => Async[F].delay(purchasedAlready(exoplanetName))
+        case (true, false) => reserve(exoplanetName, username, reservationDuration)
+        case _             => Async[F].delay(noEntry(exoplanetName))
       }
     } yield res
   }
@@ -65,9 +65,9 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
 
   /**
    *  Verify reservation.
-   *  Throws custom NoReservation error if no reservation. Otherwise extends reservation by the given amount.
+   *  If verified, the reservations gets extended by the given amount.
    */
-  def verifyReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]] =
+  def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
         case Some((sameUsername, deadline)) if (sameUsername equals username) && deadline.hasTimeLeft() =>

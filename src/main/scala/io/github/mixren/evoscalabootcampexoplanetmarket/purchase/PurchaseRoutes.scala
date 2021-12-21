@@ -53,7 +53,6 @@ object PurchaseRoutes {
         } yield res
 
 
-      // TODO Check if planet is reserved by this user and carry on with banking service
       // Purchase Exoplanet
       // curl http://localhost:8080/purchase/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "new super name", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
       case req@POST -> Root / "purchase" / "exoplanet" =>
@@ -65,12 +64,12 @@ object PurchaseRoutes {
           quatro <- req.as[QuatroExosUsrCard]
           res    <- purchaseService.makePurchase(quatro)
           resp   <- res match {
-            case Left(s)  => BadRequest(s)
-            case Right(s) => Ok(s)
+            case Left(s)   => BadRequest(s)
+            case Right(ps) => Ok(ps.msg)
           }
         } yield resp)
           .handleErrorWith {
-            case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)    // For if Json values failed custom validation
+            case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)    // For when http Json values fail custom validation
             case o => BadRequest(o.getMessage)
           }
 
