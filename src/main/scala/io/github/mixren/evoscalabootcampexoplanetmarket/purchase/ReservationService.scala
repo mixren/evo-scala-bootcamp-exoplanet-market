@@ -2,7 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
 import cats.effect.kernel.{Async, Ref}
 import cats.implicits._
-import MapReservations.MapReservations
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.MapReservations.MapReservations
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
@@ -32,6 +32,9 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
 
   private def purchasedAlready(exoplanetName: ExoplanetOfficialName): Either[String, String] =
     s"Reservation failed. Exoplanet ${exoplanetName.name} is purchased already".asLeft
+
+  private def noReservation(exoplanetName: ExoplanetOfficialName, username: UserName): Either[String, Unit] =
+    s"Error. No ${exoplanetName.name} reservation for ${username.value}".asLeft
 
   private def reserve(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration)=
     reservedExoplanets.modify{ state =>
@@ -73,7 +76,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
         case Some((sameUsername, deadline)) if (sameUsername equals username) && deadline.hasTimeLeft() =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), ().asRight)
         case _                                                                                          =>
-          (state, s"No $exoplanetName reservation for $username".asLeft)
+          (state, noReservation(exoplanetName, username))
       }
     }
 

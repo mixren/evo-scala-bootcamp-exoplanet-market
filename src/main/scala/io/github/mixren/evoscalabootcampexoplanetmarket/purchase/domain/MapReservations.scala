@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
+package io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain
 
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName

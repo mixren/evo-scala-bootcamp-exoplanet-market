@@ -1,6 +1,6 @@
 
 CREATE TABLE IF NOT EXISTS purchases (
-    id                      INTEGER   AUTO_INCREMENT  PRIMARY KEY,
+    id                      INTEGER   PRIMARY KEY AUTOINCREMENT,
     exoplanet_official_name TEXT      NOT NULL,
     exoplanet_bought_name   TEXT      NOT NULL,
     username                TEXT      NOT NULL,

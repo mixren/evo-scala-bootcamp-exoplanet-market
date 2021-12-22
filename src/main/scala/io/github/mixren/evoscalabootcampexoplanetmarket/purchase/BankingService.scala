@@ -2,6 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
 import cats.effect.Async
 import cats.implicits.{catsSyntaxApply, catsSyntaxEitherId}
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.BankCard
 
 import scala.concurrent.duration.DurationInt
 

@@ -1,11 +1,10 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.user
+package io.github.mixren.evoscalabootcampexoplanetmarket.user.domain
 
 import cats.effect.Concurrent
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{PasswordHash, User, UserName}
-import org.http4s.circe.{jsonEncoderOf, accumulatingJsonOf}
+import org.http4s.circe.{accumulatingJsonOf, jsonEncoderOf}
 import org.http4s.{EntityDecoder, EntityEncoder}
 
 case class AuthRequest(

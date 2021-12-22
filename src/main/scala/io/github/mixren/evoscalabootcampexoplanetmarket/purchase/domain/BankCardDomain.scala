@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
+package io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain
 
 import cats.effect.Concurrent
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
@@ -39,7 +39,7 @@ object CardHolderName{
     case _ => None
   }
 
-  val strError: String = "Cardholder name should contain 2-26 chars." +
+  val strError: String = "Invalid Cardholder name. Cardholder name should contain 2-26 chars." +
     " It must contain only spaces, upper and lower case letters. It must not start or end with a space."
   implicit val decoder: Decoder[CardHolderName] = deriveUnwrappedDecoder[CardHolderName].validate(
     _.value.asString match {
@@ -66,7 +66,7 @@ object CardNumber{
     case _ => None
   }
 
-  val strError = "Card number must contain between 8 and 19 digits (inclusive) and must not start with 0."
+  val strError = "Invalid card number. Card number must contain between 8 and 19 digits (inclusive) and must not start with 0."
   implicit val decoder: Decoder[CardNumber] = deriveUnwrappedDecoder[CardNumber].validate(
     _.value.asString match {
       case Some(value) => isValidNumber(value)
@@ -101,7 +101,7 @@ object CardExpiration{
     case _ => None
   }
 
-  val strError = "Card expiration should be of format YYYY-MM, where MM ranges 01-12, YYYY ranges 0001-9999 and not in the past."
+  val strError = "Invalid card expiration. Card expiration should be of format YYYY-MM, where MM ranges 01-12, YYYY ranges 0001-9999 and not in the past."
   implicit val decoder: Decoder[CardExpiration] = deriveUnwrappedDecoder[CardExpiration].validate(
     _.value.asString match {
       case Some(value) => isValidExpiration(value)
@@ -125,7 +125,7 @@ object CardCvc {
     case _ => None
   }
 
-  val strError = "Card CVC must contain between 3 and 4 digits (inclusive)."
+  val strError = "Invalid CVC. Card CVC must contain between 3 and 4 digits (inclusive)."
   implicit val decoder: Decoder[CardCvc] = deriveUnwrappedDecoder[CardCvc].validate(
     _.value.asString match {
       case Some(value) => isValidCvc(value)
