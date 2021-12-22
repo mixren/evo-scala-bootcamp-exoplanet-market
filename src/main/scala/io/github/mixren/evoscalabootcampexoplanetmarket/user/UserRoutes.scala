@@ -3,7 +3,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.user
 import cats.effect.Async
 import cats.implicits._
 import doobie.hikari.HikariTransactor
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{AuthRequest, User}
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{AuthRequest, AuthUser}
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{AuthedRoutes, HttpRoutes, InvalidMessageBodyFailure}
@@ -30,7 +30,7 @@ object UserRoutes {
         // Or smth like this? \/
         (for {
           authReq <- req.as[AuthRequest]
-          res <- userService.userLogin2(authReq)
+          res <- userService.userLogin(authReq)
           resp <- res match {
             case Left(s) => BadRequest(s)
             case Right(token) => Ok(s"Login successful. Authorization token: ${token.value}")
@@ -47,7 +47,7 @@ object UserRoutes {
       case req @ POST -> Root / "user" / "register" =>
         (for {
           authReq <- req.as[AuthRequest]
-          res     <- userService.userRegister2(authReq)
+          res     <- userService.userRegister(authReq)
           resp    <- res match {
             case Left(s)   => BadRequest(s)
             case Right(token) => Ok(s"Registration successful. Authorization token: ${token.value}")
@@ -62,15 +62,15 @@ object UserRoutes {
     }
   }
 
-  def authRoutes[F[_]: Async]: AuthedRoutes[User, F] = {
+  def authRoutes[F[_]: Async]: AuthedRoutes[AuthUser, F] = {
     val dsl = new Http4sDsl[F] {}
     import dsl._
 
-    AuthedRoutes.of[User, F] {
+    AuthedRoutes.of[AuthUser, F] {
       // curl http://localhost:8080/auth/loggedin --header "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Mzk2OTIxODYsImlhdCI6MTYzOTYwNTc4NiwidXNlck5hbWUiOiJKb2huIiwicGFzc3dvcmRIYXNoIjoiOGQ5NjllZWY2ZWNhZDNjMjlhM2E2MjkyODBlNjg2Y2YwYzNmNWQ1YTg2YWZmM2NhMTIwMjBjOTIzYWRjNmM5MiJ9.kz_4dKv9TixNcuk1_qz_X8qYZ4ZtKPDk5Zpg5DfSPZk"
       // Check if user is logged-in by passing JWT token.
       case GET -> Root / "auth" / "loggedin" as user =>
-        Ok(s"${user.userName.value} is logged in")
+        Ok(s"${user.username.value} is logged in")
 
     }
   }

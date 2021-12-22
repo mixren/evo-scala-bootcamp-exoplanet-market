@@ -1,11 +1,10 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken
 
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.User
-import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
 import cats.implicits._
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.AuthUser
+import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
 
 import java.time.Clock
 
@@ -17,16 +16,17 @@ object JwtHelper {
   private val expirationSec: Long = 24 * 3600
 
   /**
+   * Token for authenticated requests.
    * Uses external library.
    *
-   * @param user Login user
+   * @param username Login username
    * @return JWT token, which of form:
    *         "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
    *         eyJleHAiOjE3OTExMjMyNTYsImlhdCI6MTYzMzMzODQ5Nn0.
    *         mvDSTVzGgZvhBf6Iw7zdijJ3bFozj9UeJkelFyr-pws"
    */
-  def jwtEncode(user: User): JWToken = {
-    val userJson = user.asJson.noSpaces
+  def jwtEncode(username: AuthUser): JWToken = {
+    val userJson = username.asJson.noSpaces
     val claim = JwtClaim(content = userJson)
       .issuedNow
       .expiresIn(expirationSec)
@@ -38,9 +38,9 @@ object JwtHelper {
   }
 
 
-  def verifyJwtClaims(jwtClaim: JwtClaim): Either[String, User] = {
+  def verifyJwtClaims(jwtClaim: JwtClaim): Either[String, AuthUser] = {
     if (jwtClaim.isValid) {
-      decode[User](jwtClaim.content).leftMap(_ => "Error decoding user in JWT claim")
+      decode[AuthUser](jwtClaim.content).leftMap(_ => "Error decoding user in JWT claim")
     } else {
       "Token is expired".asLeft
     }

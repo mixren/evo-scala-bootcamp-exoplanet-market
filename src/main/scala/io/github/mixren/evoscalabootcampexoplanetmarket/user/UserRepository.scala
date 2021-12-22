@@ -21,7 +21,7 @@ class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
       .leftMap {t => s"Something is wrong with fetching from db. $t"}
     }*/
 
-  def userByName2(userName: UserName): F[Option[User]] = {
+  def userByName(userName: UserName): F[Option[User]] = {
     sql"""SELECT username, password FROM users WHERE username = $userName
        """
       .query[User]
@@ -47,13 +47,13 @@ class UserRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
     } yield result
   }*/
 
-  def createUser2(user: User, instant: Instant): F[Either[String, Int]] = {
+  def createUser(user: User, instant: Instant): F[Either[String, Int]] = {
     val insertSql = sql"""
                       INSERT INTO users (username, password, registration_timestamp)
-                      values (${user.userName}, ${user.passwordHash}, ${instant.toEpochMilli})
+                      values (${user.username}, ${user.passwordHash}, ${instant.toEpochMilli})
                       """
-    userByName2(user.userName).flatMap{
-      case Some(usr) => Async[F].pure(s"Error. User ${usr.userName.value} already exists".asLeft)
+    userByName(user.username).flatMap{
+      case Some(usr) => Async[F].pure(s"Error. User ${usr.username.value} already exists".asLeft)
       case None      => Async[F].fmap(insertSql.update.run.transact(xa))(_.asRight[String])
     }
   }

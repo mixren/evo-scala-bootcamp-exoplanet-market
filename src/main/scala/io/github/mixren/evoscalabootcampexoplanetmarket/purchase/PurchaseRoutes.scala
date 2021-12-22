@@ -8,7 +8,7 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepos
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.MapReservations.MapReservations
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.TrioExosCard
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.User
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.AuthUser
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{AuthedRoutes, InvalidMessageBodyFailure}
@@ -16,8 +16,8 @@ import org.http4s.{AuthedRoutes, InvalidMessageBodyFailure}
 import scala.concurrent.duration.DurationInt
 
 object PurchaseRoutes {
-  // TODO AuthedRoute with with Bankcard, official exoplanet name and new exoplanet name.
-  def authRoutes[F[_]: Async](reservedExoplanets: Ref[F, MapReservations])(implicit xa: HikariTransactor[F]): AuthedRoutes[User, F] = {
+
+  def authRoutes[F[_]: Async](reservedExoplanets: Ref[F, MapReservations])(implicit xa: HikariTransactor[F]): AuthedRoutes[AuthUser, F] = {
     val dsl = new Http4sDsl[F] {}
     import dsl._
     val exoRepo = new ExoplanetRepository[F]
@@ -26,14 +26,14 @@ object PurchaseRoutes {
     val bankingService = new BankingServiceForTesting[F]
     val purchaseService = new PurchaseService[F](reservationService, bankingService, purRepo)
 
-    AuthedRoutes.of[User, F] {
+    AuthedRoutes.of[AuthUser, F] {
       // Reserve an exoplanet before purchasing one
       // Fail:    curl http://localhost:8080/purchase/reserve/exoplanet -d '{"exoplanetName" : "Hal Oh 5G"}' -H "Content-Type: application/json"
       // Success: curl http://localhost:8080/purchase/reserve/exoplanet -d '{"exoplanetName" : "2I/Borisov"}' -H "Content-Type: application/json"
       case req @ POST -> Root / "purchase" / "reserve" / "exoplanet" as user =>
         (for {
           exoName   <- req.req.as[ExoplanetOfficialName]
-          reserved  <- reservationService.reserveExoplanet(exoName, user.userName, 5.minutes)
+          reserved  <- reservationService.reserveExoplanet(exoName, user.username, 5.minutes)
           resp      <- reserved match {
             case Left(s)  => BadRequest(s)
             case Right(s) => Ok(s)
@@ -46,10 +46,10 @@ object PurchaseRoutes {
 
       // Purchase Exoplanet
       // curl http://localhost:8080/purchase/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "new super name", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
-      case req@POST -> Root / "purchase" / "exoplanet" as user =>
+      case req @ POST -> Root / "purchase" / "exoplanet" as user =>
         (for {
           trio <- req.req.as[TrioExosCard]
-          res    <- purchaseService.makePurchase(trio, user.userName)
+          res    <- purchaseService.makePurchase(trio, user.username)
           resp   <- res match {
             case Left(s)   => BadRequest(s)
             case Right(ps) => Ok(ps.msg)
@@ -63,7 +63,7 @@ object PurchaseRoutes {
       // Get all purchases by user
       // curl http://localhost:8080/purchase/history/user
       case GET -> Root / "purchase" / "history" / "user" as user =>
-        Ok(purRepo.purchaseByUser(user.userName))
+        Ok(purRepo.purchaseByUser(user.username))
 
     }
   }

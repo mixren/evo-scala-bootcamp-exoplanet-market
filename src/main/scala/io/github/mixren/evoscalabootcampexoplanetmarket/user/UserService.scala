@@ -2,7 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.user
 
 import cats.effect.Async
 import cats.implicits.{catsSyntaxEitherId, toFlatMapOps}
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{AuthRequest, PasswordHash}
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{AuthRequest, AuthUser, PasswordHash}
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.HashGenerator
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JWToken
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JwtHelper.jwtEncode
@@ -24,13 +24,13 @@ class UserService[F[_]: Async](repo: UserRepository[F]) {
       }
     } yield result*/
 
-  def userLogin2(authRequest: AuthRequest): F[Either[String, JWToken]] = {
+  def userLogin(authRequest: AuthRequest): F[Either[String, JWToken]] = {
     val passHash = HashGenerator.run(authRequest.password.value)
-    repo.userByName2(authRequest.userName).flatMap {
+    repo.userByName(authRequest.username).flatMap {
       case Some(user) if user.validate(passHash)  =>
-        Async[F].pure(jwtEncode(user).asRight[String])
+        Async[F].pure(jwtEncode(AuthUser(user.username)).asRight[String])
       case None                               =>
-        Async[F].pure(s"Error. User ${authRequest.userName.value} is not registered".asLeft[JWToken])
+        Async[F].pure(s"Error. User ${authRequest.username.value} is not registered".asLeft[JWToken])
       case _                                  =>
         Async[F].pure(s"Error. Wrong password".asLeft[JWToken])
     }
@@ -44,12 +44,12 @@ class UserService[F[_]: Async](repo: UserRepository[F]) {
       user      <- repo.createUser(user, Instant.now())
     } yield jwtEncode(user)*/
 
-  def userRegister2(authRequest: AuthRequest): F[Either[String, JWToken]] = {
+  def userRegister(authRequest: AuthRequest): F[Either[String, JWToken]] = {
     val passHash = HashGenerator.run(authRequest.password.value)
     val user = authRequest.asUser(PasswordHash(passHash))
-    repo.createUser2(user, Instant.now()).flatMap{a =>
+    repo.createUser(user, Instant.now()).flatMap{ a =>
       Async[F].delay(a.map{_ =>
-        jwtEncode(user)
+        jwtEncode(AuthUser(user.username))
       })
     }
 

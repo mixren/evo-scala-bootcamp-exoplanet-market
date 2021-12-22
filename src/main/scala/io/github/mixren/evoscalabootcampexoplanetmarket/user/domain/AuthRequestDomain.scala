@@ -8,11 +8,11 @@ import org.http4s.circe.{accumulatingJsonOf, jsonEncoderOf}
 import org.http4s.{EntityDecoder, EntityEncoder}
 
 case class AuthRequest(
-                        userName: UserName,
+                        username: UserName,
                         password: AuthPassword
                       ) {
   def asUser(hashedPassword: PasswordHash): User = User(
-    userName,
+    username,
     hashedPassword
   )
 }

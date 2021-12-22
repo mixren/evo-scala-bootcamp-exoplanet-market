@@ -9,7 +9,7 @@ import org.http4s.{EntityDecoder, EntityEncoder}
 
 
 // userName is unique
-case class User(userName: UserName, passwordHash: PasswordHash){
+case class User(username: UserName, passwordHash: PasswordHash){
   def validate(hash: String): Boolean =
     passwordHash.value equals hash
 }
