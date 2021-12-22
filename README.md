@@ -56,6 +56,6 @@ handy for complex CSVs where commas are where not expected
 
 ### To do:
 1) Write tests!!!!
-2)Maybe add some generous offer - pay 2 for 3 names. Then Ill need to store this info somewhere.
+2) Maybe add some generous offer - pay 2 for 3 names. Then Ill need to store this info somewhere.
 Might be unfair when all planets taken.
-99) Fetch exoplanets .csv from http://exoplanet.eu/catalog/csv via routes
+3) Fetch exoplanets .csv from http://exoplanet.eu/catalog/csv via routes
