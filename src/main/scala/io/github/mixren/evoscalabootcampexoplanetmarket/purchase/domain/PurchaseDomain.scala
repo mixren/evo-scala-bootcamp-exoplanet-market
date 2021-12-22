@@ -1,6 +1,7 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain
 
 import cats.effect.Concurrent
+import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.{ExoplanetNewName, ExoplanetOfficialName}
@@ -25,8 +26,8 @@ object Purchase{
 
 case class PurchasePrice(value: BigDecimal) extends AnyVal
 object PurchasePrice{
-  implicit val decoder: Decoder[PurchasePrice] = deriveDecoder[PurchasePrice]
-  implicit val encoder: Encoder[PurchasePrice] = deriveEncoder[PurchasePrice]
+  implicit val decoder: Decoder[PurchasePrice] = deriveUnwrappedDecoder[PurchasePrice]
+  implicit val encoder: Encoder[PurchasePrice] = deriveUnwrappedEncoder[PurchasePrice]
   implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, PurchasePrice] = accumulatingJsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, PurchasePrice] = jsonEncoderOf
 }

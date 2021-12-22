@@ -49,12 +49,13 @@ handy for complex CSVs where commas are where not expected
 - Have a route, which reads DB and returns exoplanets as JSON
 - Authentication is enabled using JWT stateless method.
 - DB migrations is added
+- Case classes have String/Json validation
+- Exoplanets can be reserved with timeout by an authenticated user
+- Exoplanets can be purchased by an authenticated user
+- Purchased exoplanets can be shown
 
 ### To do:
-1) Begin with the app backbone - exoplanets purchases
-I will need an AuthRoute for purchase requisition that would include: card(name, number, expiry, cvc),
-exoplanet official name, exoplanet new name.
-2) Card values validator
-3) Maybe add some generous offer - pay 2 for 3 names. Then Ill need to store this info somewhere.
+1) Write tests!!!!
+2)Maybe add some generous offer - pay 2 for 3 names. Then Ill need to store this info somewhere.
 Might be unfair when all planets taken.
 99) Fetch exoplanets .csv from http://exoplanet.eu/catalog/csv via routes

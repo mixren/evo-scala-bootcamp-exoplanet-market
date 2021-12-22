@@ -9,6 +9,7 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.Exoplan
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.MapReservations.MapReservations
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.TrioExosCard
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.User
+import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{AuthedRoutes, InvalidMessageBodyFailure}
 
@@ -39,7 +40,7 @@ object PurchaseRoutes {
           }
         } yield resp)
           .handleErrorWith {
-            case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)    // For when http Json values fail custom validation
+            case f: InvalidMessageBodyFailure => BadRequest(f.getMessage + f.getCause.getMessage)    // For when http Json values fail custom validation
             case o => BadRequest(o.getMessage)
           }
 
@@ -58,6 +59,12 @@ object PurchaseRoutes {
             case f: InvalidMessageBodyFailure => BadRequest(f.getCause.getMessage)    // For when http Json values fail custom validation
             case o => BadRequest(o.getMessage)
           }
+
+      // Get all purchases by user
+      // curl http://localhost:8080/purchase/history/user
+      case GET -> Root / "purchase" / "history" / "user" as user =>
+        Ok(purRepo.purchaseByUser(user.userName))
+
     }
   }
 

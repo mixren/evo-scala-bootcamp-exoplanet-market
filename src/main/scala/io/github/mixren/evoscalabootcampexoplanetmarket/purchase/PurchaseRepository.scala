@@ -6,6 +6,7 @@ import doobie.implicits._
 import doobie.util.update.Update
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.Purchase
+import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 
 class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
   def addPurchase(purchase: Purchase): F[Either[String, Int]] = {
@@ -29,6 +30,16 @@ class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
        """
       .query[Purchase]
       .option
+      .transact(xa)
+  }
+
+  def purchaseByUser(username: UserName): F[List[Purchase]] = {
+    sql"""SELECT exoplanet_official_name, exoplanet_bought_name, username, price, timestamp
+          FROM purchases
+          WHERE username = $username
+       """
+      .query[Purchase]
+      .to[List]
       .transact(xa)
   }
 

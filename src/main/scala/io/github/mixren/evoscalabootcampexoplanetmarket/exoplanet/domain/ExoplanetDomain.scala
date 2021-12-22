@@ -4,7 +4,7 @@ import cats.effect.Concurrent
 import io.circe.generic.extras.semiauto.{deriveUnwrappedDecoder, deriveUnwrappedEncoder}
 import io.circe.generic.semiauto._
 import io.circe.{Decoder, Encoder}
-import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.circe.{accumulatingJsonOf, jsonEncoderOf, jsonOf}
 import org.http4s.{EntityDecoder, EntityEncoder}
 
 import scala.util.Try
@@ -49,17 +49,45 @@ object Exoplanet {
 
 case class ExoplanetOfficialName(name: String) extends AnyVal
 object ExoplanetOfficialName {
-  implicit val decode: Decoder[ExoplanetOfficialName] = deriveUnwrappedDecoder[ExoplanetOfficialName]
+  def isValidName(str: String): Boolean = str.trim.nonEmpty && str.trim.length == str.length && str.length > 2
+
+  def of(value: String): Option[ExoplanetOfficialName] = value match {
+    case v if isValidName(v) => Some(ExoplanetOfficialName(v))
+    case _ => None
+  }
+
+  val strError: String = "Invalid exoplanet name. Username should not be surrounded by spaces and should have 3 or more characters."
+  implicit val decoder: Decoder[ExoplanetOfficialName] = deriveUnwrappedDecoder[ExoplanetOfficialName].validate(
+    _.value.asString match {
+      case Some(value) => isValidName(value)
+      case None => false
+    },
+    strError
+  )
   implicit val encode: Encoder[ExoplanetOfficialName] = deriveUnwrappedEncoder[ExoplanetOfficialName]
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, ExoplanetOfficialName] = jsonOf
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, ExoplanetOfficialName] = accumulatingJsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, ExoplanetOfficialName] = jsonEncoderOf
 }
 
 case class ExoplanetNewName(value: String) extends AnyVal
 object ExoplanetNewName {
-  implicit val decode: Decoder[ExoplanetNewName] = deriveUnwrappedDecoder[ExoplanetNewName]
+  def isValidName(str: String): Boolean = str.trim.nonEmpty && str.trim.length == str.length && str.length > 2
+
+  def of(value: String): Option[ExoplanetNewName] = value match {
+    case v if isValidName(v) => Some(ExoplanetNewName(v))
+    case _ => None
+  }
+
+  val strError: String = "Invalid new exoplanet name. Username should not be surrounded by spaces and should have 3 or more characters."
+  implicit val decoder: Decoder[ExoplanetNewName] = deriveUnwrappedDecoder[ExoplanetNewName].validate(
+    _.value.asString match {
+      case Some(value) => isValidName(value)
+      case None => false
+    },
+    strError
+  )
   implicit val encode: Encoder[ExoplanetNewName] = deriveUnwrappedEncoder[ExoplanetNewName]
-  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, ExoplanetNewName] = jsonOf
+  implicit def entityDecoder[F[_]: Concurrent]: EntityDecoder[F, ExoplanetNewName] = accumulatingJsonOf
   implicit def entityEncoder[F[_]]:             EntityEncoder[F, ExoplanetNewName] = jsonEncoderOf
 }
 
