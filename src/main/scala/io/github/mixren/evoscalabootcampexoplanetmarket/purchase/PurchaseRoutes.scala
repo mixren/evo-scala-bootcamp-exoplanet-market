@@ -25,14 +25,13 @@ object PurchaseRoutes {
     val bankingService = new BankingServiceForTesting[F]
     val purchaseService = new PurchaseService[F](reservationService, bankingService, purRepo)
 
-    // TODO fix it!
     AuthedRoutes.of[User, F] {
       // Reserve an exoplanet before purchasing one
       // Fail:    curl http://localhost:8080/purchase/reserve/exoplanet -d '{"exoplanetName" : "Hal Oh 5G"}' -H "Content-Type: application/json"
       // Success: curl http://localhost:8080/purchase/reserve/exoplanet -d '{"exoplanetName" : "2I/Borisov"}' -H "Content-Type: application/json"
       case req @ POST -> Root / "purchase" / "reserve" / "exoplanet" as user =>
         (for {
-          exoName   <- req.as[ExoplanetOfficialName]
+          exoName   <- req.req.as[ExoplanetOfficialName]
           reserved  <- reservationService.reserveExoplanet(exoName, user.userName, 5.minutes)
           resp      <- reserved match {
             case Left(s)  => BadRequest(s)
@@ -48,7 +47,7 @@ object PurchaseRoutes {
       // curl http://localhost:8080/purchase/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "new super name", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
       case req@POST -> Root / "purchase" / "exoplanet" as user =>
         (for {
-          trio <- req.as[TrioExosCard]
+          trio <- req.req.as[TrioExosCard]
           res    <- purchaseService.makePurchase(trio, user.userName)
           resp   <- res match {
             case Left(s)   => BadRequest(s)
