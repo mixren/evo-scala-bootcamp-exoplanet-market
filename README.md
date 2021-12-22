@@ -45,7 +45,7 @@ handy for complex CSVs where commas are where not expected
 - Manually uploaded the .csv file full of exoplanets data
 - Now I have Exoplanet case class
 - Now I can read .csv, filter and convert it to objects
-- Now I can save objets to the local sql db using Doobie. My database is src/sql/exoplanets.db
+- Now I can save objets to the local sql db using Doobie. My database is src/sql/exoplanetsmarket.db
 - Have a route, which reads DB and returns exoplanets as JSON
 - Authentication is enabled using JWT stateless method.
 - DB migrations is added
