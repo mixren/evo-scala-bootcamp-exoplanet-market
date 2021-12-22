@@ -3,7 +3,7 @@
 ## Overview
 Personal Scala project that concludes the Scala Bootcamp from Evolution training.
 Started on December the 7th, 2021.
-Due to ~ December the 26th, 2021.
+Due to December the 29th, 2021.
 
 ### Project Idea
 Exoplanet market. Show users all discovered exoplanets.
