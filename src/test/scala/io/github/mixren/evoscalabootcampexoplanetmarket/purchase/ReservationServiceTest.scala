@@ -54,7 +54,4 @@ class ReservationServiceTest extends AnyFlatSpec{
     assert(releaseEx4U4.unsafeRunSync().isRight)
   }
 
-
-
-
 }
