@@ -8,8 +8,15 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.Exoplan
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.Purchase
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 
-class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
-  def addPurchase(purchase: Purchase): F[Either[String, Int]] = {
+
+trait PurchaseRepositoryT[F[_]] {
+  def addPurchase(purchase: Purchase): F[Either[String, Int]]
+  def purchaseByExoOfficialName(name: ExoplanetOfficialName): F[Option[Purchase]]
+  def purchaseByUser(username: UserName): F[List[Purchase]]
+}
+
+class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) extends PurchaseRepositoryT[F] {
+  override def addPurchase(purchase: Purchase): F[Either[String, Int]] = {
     val sql =
       """
         |INSERT INTO purchases(
@@ -23,7 +30,7 @@ class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
       .attemptSomeSqlState(t => s"Something is wrong with fetching from db. $t")
   }
 
-  def purchaseByExoOfficialName(name: ExoplanetOfficialName): F[Option[Purchase]] = {
+  override def purchaseByExoOfficialName(name: ExoplanetOfficialName): F[Option[Purchase]] = {
     sql"""SELECT exoplanet_official_name, exoplanet_bought_name, username, price, timestamp
           FROM purchases
           WHERE exoplanet_official_name = $name
@@ -33,7 +40,7 @@ class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) {
       .transact(xa)
   }
 
-  def purchaseByUser(username: UserName): F[List[Purchase]] = {
+  override def purchaseByUser(username: UserName): F[List[Purchase]] = {
     sql"""SELECT exoplanet_official_name, exoplanet_bought_name, username, price, timestamp
           FROM purchases
           WHERE username = $username

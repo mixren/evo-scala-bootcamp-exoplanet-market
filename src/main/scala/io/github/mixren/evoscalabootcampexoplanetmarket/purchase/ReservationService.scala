@@ -2,9 +2,9 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
 import cats.effect.kernel.{Async, Ref}
 import cats.implicits._
-import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.MapReservations.MapReservations
-import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
+import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepositoryT
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.MapReservations.MapReservations
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 
 import scala.concurrent.duration.FiniteDuration
@@ -16,10 +16,15 @@ object ReservationResult {
   case class SpecificError(msg: String) extends Error
 }
 */
+trait ReservationServiceT[F[_]] {
+  def reserveExoplanet(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]]
+  def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]]
+  def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Unit]
+}
 
-class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
-                                      purRepo: PurchaseRepository[F],
-                                      reservedExoplanets: Ref[F, MapReservations]) {
+class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
+                                      purRepo: PurchaseRepositoryT[F],
+                                      reservedExoplanets: Ref[F, MapReservations]) extends ReservationServiceT[F] {
 
   private def success(exoplanetName: ExoplanetOfficialName, username: UserName, duration: FiniteDuration): Either[String, String] =
     s"Reservation successful. ${exoplanetName.name} is reserved by ${username.value} for ${duration.toCoarsest.toString()}.".asRight
@@ -53,7 +58,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
    *  Is reserved only if the exoplanet exists, not purchased and not reserved for another user at the moment.
    *  Re-reservation by the same user is possible.
    */
-  def reserveExoplanet(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]] = {
+  override def reserveExoplanet(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]] = {
     for {
       exoO  <- exoRepo.exoplanetByName(exoplanetName)
       purO  <- purRepo.purchaseByExoOfficialName(exoplanetName)
@@ -70,7 +75,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
    *  Verify reservation.
    *  If verified, the reservations gets extended by the given amount.
    */
-  def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]] =
+  override def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
         case Some((sameUsername, deadline)) if (sameUsername equals username) && deadline.hasTimeLeft() =>
@@ -84,7 +89,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepository[F],
    *  Release exoplanet reservation by user.
    *  No release if the reservation is made by another user.
    */
-  def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Unit] =
+  override def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Unit] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
         case Some((sameUsername, _)) if sameUsername equals username  =>

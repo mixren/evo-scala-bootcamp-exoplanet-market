@@ -6,11 +6,11 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.BankCard
 
 import scala.concurrent.duration.DurationInt
 
-sealed trait PaymentResult
+/*sealed trait PaymentResult
 object PaymentResult {
   final case class Successful(value: String) extends PaymentResult
   final case class Failed(value: String) extends PaymentResult
-}
+}*/
 case class SomeId(value: String) extends AnyVal
 case class PaymentSuccessful(value: String) extends AnyVal
 
