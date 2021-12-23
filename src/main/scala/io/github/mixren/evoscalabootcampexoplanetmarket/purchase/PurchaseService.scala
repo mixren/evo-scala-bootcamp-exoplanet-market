@@ -2,19 +2,11 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
 import cats.data.EitherT
 import cats.effect.Async
-import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.{ExoplanetNewName, ExoplanetOfficialName}
-import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.{Purchase, PurchasePrice, TrioExosCard}
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.{Purchase, PurchasePrice, PurchaseSuccess, TrioExosCard}
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
-
 import java.time.Instant
 import scala.concurrent.duration.DurationInt
 
-case class PurchaseSuccess(msg: String) extends AnyVal
-object PurchaseSuccess{
-  def of(username: UserName, exoplanetName: ExoplanetOfficialName, exoplanetNewName: ExoplanetNewName): PurchaseSuccess ={
-    PurchaseSuccess(s"""$username has successfully named the exoplanet \"$exoplanetName\" as \"$exoplanetNewName\".""")
-  }
-}
 
 trait MyPurchaseService[F[_]] {
   def makePurchase(quatro: TrioExosCard, userName: UserName): F[Either[String, PurchaseSuccess]]
