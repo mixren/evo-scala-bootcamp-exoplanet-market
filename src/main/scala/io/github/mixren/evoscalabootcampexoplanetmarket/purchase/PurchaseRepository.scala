@@ -12,7 +12,7 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 trait PurchaseRepositoryT[F[_]] {
   def addPurchase(purchase: Purchase): F[Either[String, Int]]
   def purchaseByExoOfficialName(name: ExoplanetOfficialName): F[Option[Purchase]]
-  def purchaseByUser(username: UserName): F[List[Purchase]]
+  def purchasesByUser(username: UserName): F[List[Purchase]]
 }
 
 class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) extends PurchaseRepositoryT[F] {
@@ -40,7 +40,7 @@ class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) extends 
       .transact(xa)
   }
 
-  override def purchaseByUser(username: UserName): F[List[Purchase]] = {
+  override def purchasesByUser(username: UserName): F[List[Purchase]] = {
     sql"""SELECT exoplanet_official_name, exoplanet_bought_name, username, price, timestamp
           FROM purchases
           WHERE username = $username

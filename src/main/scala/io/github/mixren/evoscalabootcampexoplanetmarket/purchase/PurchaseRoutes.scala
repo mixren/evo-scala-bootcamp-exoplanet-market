@@ -63,7 +63,7 @@ object PurchaseRoutes {
       // Get all purchases by user
       // curl http://localhost:8080/purchase/history/user
       case GET -> Root / "purchase" / "history" / "user" as user =>
-        Ok(purRepo.purchaseByUser(user.username))
+        Ok(purRepo.purchasesByUser(user.username))
 
     }
   }
