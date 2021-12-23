@@ -23,8 +23,13 @@ class ReservationServiceTest extends AnyFlatSpec{
 
   val realExoplanetName1   = ExoplanetOfficialName("2I/Borisov")
   val realExoplanetName2   = ExoplanetOfficialName("1RXS 1609 b")
+  val realExoplanetName3   = ExoplanetOfficialName("1SWASP J1407 b")
+  val realExoplanetName4   = ExoplanetOfficialName("16 Cyg B b")
+
   val validUsername1       = UserName("Jax")
   val validUsername2       = UserName("Allah")
+  val validUsername3       = UserName("Jin")
+  val validUsername4       = UserName("Vasya")
   val reservationDuration  = 5.seconds
 
 
@@ -38,12 +43,32 @@ class ReservationServiceTest extends AnyFlatSpec{
     assert(reserveEx2U2.unsafeRunSync().isRight)
   }
 
+  it should "verify reservations and, if successful, extend them" in {
+    val reserveEx3U3  = reservationService.reserveExoplanet(          realExoplanetName3, validUsername3, reservationDuration)
+    val verify_Ex3U3  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername3, reservationDuration)
+    val verify_Ex3U1  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername1, reservationDuration)
+    assert(verify_Ex3U3.unsafeRunSync().isLeft)
+    assert(reserveEx3U3.unsafeRunSync().isRight)
+    assert(verify_Ex3U3.unsafeRunSync().isRight)
+    assert(verify_Ex3U1.unsafeRunSync().isLeft)
+  }
+
+  it should "release reservation by the same user" in {
+    val reserveEx4U4 = reservationService.reserveExoplanet(  realExoplanetName4, validUsername4, reservationDuration)
+    val releaseEx4U3 = reservationService.releaseReservation(realExoplanetName4, validUsername3)
+    val releaseEx4U4 = reservationService.releaseReservation(realExoplanetName4, validUsername4)
+    assert(reserveEx4U4.unsafeRunSync().isRight)
+    assert(releaseEx4U3.unsafeRunSync().isLeft)
+    assert(releaseEx4U4.unsafeRunSync().isRight)
+  }
+
   private class TestExoplanetRepository[F[_]: Async] extends ExoplanetRepositoryT[F] {
     // Real are only Exoplanet names
-    val exo1 = Exoplanet(1, ExoplanetOfficialName("1SWASP J1407 b"), Some(Mass(13)), None, None, Some(Ra(200.347819)), Some(Dec(9.134452)), Some(Year(2011)))
-    val exo2 = Exoplanet(2, ExoplanetOfficialName("2I/Borisov"), None, Some(Radius(0.77)), None, Some(Ra(136.674787)), Some(Dec(19.9390135139)), Some(Year(2020)))
-    val exo3 = Exoplanet(3, ExoplanetOfficialName("1RXS 1609 b"), None, None, Some(Distance(60.2)), Some(Ra(80.9473181)), Some(Dec(5.7486729294)), Some(Year(2001)))
-    val exoList = List(exo1, exo2, exo3)
+    val exo1 = Exoplanet(1, ExoplanetOfficialName("2I/Borisov"), Some(Mass(13)), None, None, Some(Ra(200.347819)), Some(Dec(9.134452)), Some(Year(2011)))
+    val exo2 = Exoplanet(2, ExoplanetOfficialName("1RXS 1609 b"), None, Some(Radius(0.77)), None, Some(Ra(136.674787)), Some(Dec(19.9390135139)), Some(Year(2020)))
+    val exo3 = Exoplanet(3, ExoplanetOfficialName("1SWASP J1407 b"), None, None, Some(Distance(60.2)), Some(Ra(80.9473181)), Some(Dec(5.7486729294)), Some(Year(2001)))
+    val exo4 = Exoplanet(4, ExoplanetOfficialName("16 Cyg B b"), Some(Mass(6)), None, Some(Distance(124.8)), Some(Ra(54.56542)), Some(Dec(11.84532507)), Some(Year(1994)))
+    val exoList = List(exo1, exo2, exo3, exo4)
 
     override def insertExoplanets(exps: List[Exoplanet]): F[Int] = Async[F].pure(0)
 

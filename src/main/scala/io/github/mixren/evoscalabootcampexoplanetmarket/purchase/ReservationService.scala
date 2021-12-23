@@ -19,7 +19,7 @@ object ReservationResult {
 trait ReservationServiceT[F[_]] {
   def reserveExoplanet(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]]
   def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]]
-  def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Unit]
+  def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Either[String,Unit]]
 }
 
 class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
@@ -40,6 +40,10 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
 
   private def noReservation(exoplanetName: ExoplanetOfficialName, username: UserName): Either[String, Unit] =
     s"Error. No ${exoplanetName.name} reservation for ${username.value}".asLeft
+
+  private def noRelease(exoplanetName: ExoplanetOfficialName, username: UserName): Either[String, Unit] =
+    (s"Error. Can't release ${exoplanetName.name} reservation for ${username.value}." +
+      s" It might not be reserved or reserved by another user").asLeft
 
   private def reserve(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration)=
     reservedExoplanets.modify{ state =>
@@ -73,7 +77,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
 
   /**
    *  Verify reservation.
-   *  If verified, the reservations gets extended by the given amount.
+   *  If successfully verified, the reservations gets extended by the given amount.
    */
   override def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
@@ -89,13 +93,13 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
    *  Release exoplanet reservation by user.
    *  No release if the reservation is made by another user.
    */
-  override def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Unit] =
+  override def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
         case Some((sameUsername, _)) if sameUsername equals username  =>
-          (state.removed(exoplanetName), ())
+          (state.removed(exoplanetName), ().asRight)
         case _                                                        =>
-          (state, ())
+          (state, noRelease(exoplanetName, username))
       }
     }
 
