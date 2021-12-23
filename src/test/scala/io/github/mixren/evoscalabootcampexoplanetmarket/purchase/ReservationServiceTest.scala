@@ -3,13 +3,13 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 import cats.effect.IO
 import cats.effect.kernel.Ref
 import cats.effect.unsafe.implicits.global
-import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.{FakeExoplanetRepository, FakePurchaseRepository}
 import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.FakeExoplanets._
+import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.FakeUsers._
+import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.{FakeExoplanetRepository, FakePurchaseRepository}
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.MapReservations.MapReservations
-import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 import org.scalatest.flatspec.AnyFlatSpec
 
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 class ReservationServiceTest extends AnyFlatSpec{
 
@@ -19,11 +19,7 @@ class ReservationServiceTest extends AnyFlatSpec{
     Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
   )
 
-  val validUsername1       = UserName("Jax")
-  val validUsername2       = UserName("Allah")
-  val validUsername3       = UserName("Jin")
-  val validUsername4       = UserName("Vasya")
-  val reservationDuration  = 5.seconds
+  val reservationDuration: FiniteDuration = 5.seconds
 
   "ReservationService" should "let users reserve exoplanets not reserved by other users" in {
     val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, reservationDuration)

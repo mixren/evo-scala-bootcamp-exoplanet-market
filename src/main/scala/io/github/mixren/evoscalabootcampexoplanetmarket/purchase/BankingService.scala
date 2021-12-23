@@ -14,11 +14,11 @@ object PaymentResult {
 case class SomeId(value: String) extends AnyVal
 case class PaymentSuccessful(value: String) extends AnyVal
 
-trait BankingService[F[_]] {
+trait BankingServiceT[F[_]] {
   def makePayment(payerCard: BankCard, amount: BigDecimal, receiverId: SomeId): F[Either[String, PaymentSuccessful]] //receiver Id will always be the same
 }
 
-class BankingServiceForTesting[F[_]: Async] extends BankingService[F] {
+class BankingServiceForTesting[F[_]: Async] extends BankingServiceT[F] {
   override def makePayment(payerCard: BankCard, amount: BigDecimal, receiverId: SomeId): F[Either[String, PaymentSuccessful]] = {
     Async[F].sleep(1.second) *> Async[F].pure(PaymentSuccessful("wowow").asRight)
   }

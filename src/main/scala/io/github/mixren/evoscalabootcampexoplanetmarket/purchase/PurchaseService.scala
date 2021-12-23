@@ -8,16 +8,16 @@ import java.time.Instant
 import scala.concurrent.duration.DurationInt
 
 
-trait MyPurchaseService[F[_]] {
-  def makePurchase(quatro: TrioExosCard, userName: UserName): F[Either[String, PurchaseSuccess]]
+trait PurchaseServiceT[F[_]] {
+  def makePurchase(trio: TrioExosCard, userName: UserName): F[Either[String, PurchaseSuccess]]
 }
 
-class PurchaseService[F[_]: Async](reservationService: ReservationService[F],
-                                   bankingService: BankingService[F],
-                                   repo: PurchaseRepository[F]) extends MyPurchaseService[F] {
+class PurchaseService[F[_]: Async](reservationService: ReservationServiceT[F],
+                                   bankingService: BankingServiceT[F],
+                                   repo: PurchaseRepositoryT[F]) extends PurchaseServiceT[F] {
 
-  // TODO P.S. payment can be made, but db write by repo.addPurchase still can fail
-  //  (very not likely, but why not to consider some fallback)
+  // TODO P.S. payment can be made, but db write by repo.addPurchase still can fail.
+  //  Although, very not likely, but why not to consider some fallback
   override def makePurchase(trio: TrioExosCard, username: UserName): F[Either[String, PurchaseSuccess]] = {
     (for {
       _      <- EitherT(reservationService.verifyAndExtendReservation(trio.exoplanetName, username, 5.minute))
@@ -27,7 +27,7 @@ class PurchaseService[F[_]: Async](reservationService: ReservationService[F],
         username,
         PurchasePrice(BigDecimal(4.99)),
         Instant.now().toEpochMilli)) )
-      _      <- EitherT.right[String](reservationService.releaseReservation(trio.exoplanetName, username))   // TODO release it in any case!
+      _      <- EitherT.right[String](reservationService.releaseReservation(trio.exoplanetName, username))   // TODO release it in any case! mb in Main
     } yield PurchaseSuccess.of(username, trio.exoplanetName, trio.exoplanetNewName))
       .value
   }
