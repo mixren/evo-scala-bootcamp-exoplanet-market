@@ -27,7 +27,7 @@ class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) extends 
       .toUpdate0(purchase)
       .run
       .transact(xa)
-      .attemptSomeSqlState(t => s"Something is wrong with fetching from db. $t")
+      .attemptSomeSqlState(t => s"Something is wrong with writing to db. $t")
   }
 
   override def purchaseByExoOfficialName(name: ExoplanetOfficialName): F[Option[Purchase]] = {
