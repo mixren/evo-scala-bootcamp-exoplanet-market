@@ -4,13 +4,11 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import cats.implicits.catsSyntaxEitherId
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.{ExoplanetNewName, ExoplanetOfficialName}
+import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.FakeBankCard.fakeBankCard
 import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.FakeUsers.validUsername1
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.flatspec.AnyFlatSpec
-
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 
 class PurchaseServiceTest extends AnyFlatSpec with MockFactory{
 
@@ -27,12 +25,7 @@ class PurchaseServiceTest extends AnyFlatSpec with MockFactory{
   val trioExosCard: TrioExosCard = TrioExosCard(
     ExoplanetOfficialName("exoOffName"),
     ExoplanetNewName("exoNewName"),
-    BankCard(
-      CardHolderName("Bake Baker"),
-      CardNumber("1111222233334444"),
-      CardExpiration(YearMonth.parse("2023-12", DateTimeFormatter.ofPattern("uuuu-MM"))),
-      CardCvc("123")
-    )
+    fakeBankCard
   )
 
   "PurchaseService" should "successfully process the exoplanet name purchase in case the user-purchaser" +

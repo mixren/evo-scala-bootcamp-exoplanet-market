@@ -1,58 +1,41 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket.user
 
 import cats.effect.Async
-import cats.implicits.{catsSyntaxEitherId, toFlatMapOps}
+import cats.implicits._
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{AuthRequest, AuthUser, PasswordHash}
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.HashGenerator
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JWToken
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JwtHelper.jwtEncode
-
 import java.time.Instant
 
-class UserService[F[_]: Async](repo: UserRepository[F]) {
 
-  /*def userLogin(authRequest: F[AuthRequest]): EitherT[F, String, JWToken] =
-    for {
-      authReq     <- authRequest.attemptT.leftMap(t => t.getMessage)
-      userO       <- repo.userByName(authReq.userName)
-      user        <- EitherT.fromOption[F](userO, s"User ${authReq.userName.value} is not registered")
-      hash        = HashGenerator.run(authReq.password.value)
-      result      <- if (user.validate(hash)) {
-        EitherT.rightT[F, String](jwtEncode(user))
-      } else {
-        EitherT.leftT[F, JWToken]("Wrong password")
-      }
-    } yield result*/
+trait UserServiceT[F[_]]{
+  def userLogin(authRequest: AuthRequest): F[Either[String, JWToken]]
+  def userRegister(authRequest: AuthRequest): F[Either[String, JWToken]]
+}
 
-  def userLogin(authRequest: AuthRequest): F[Either[String, JWToken]] = {
+class UserService[F[_]: Async](repo: UserRepository[F]) extends UserServiceT[F]{
+
+  override def userLogin(authRequest: AuthRequest): F[Either[String, JWToken]] = {
     val passHash = HashGenerator.run(authRequest.password.value)
-    repo.userByName(authRequest.username).flatMap {
+    for {
+      userO <- repo.userByName(authRequest.username)
+    } yield userO match {
       case Some(user) if user.validate(passHash)  =>
-        Async[F].pure(jwtEncode(AuthUser(user.username)).asRight[String])
+        jwtEncode(AuthUser(user.username)).asRight[String]
       case None                               =>
-        Async[F].pure(s"Error. User ${authRequest.username.value} is not registered".asLeft[JWToken])
+        s"Error. User ${authRequest.username.value} is not registered".asLeft[JWToken]
       case _                                  =>
-        Async[F].pure(s"Error. Wrong password".asLeft[JWToken])
+        s"Error. Wrong password".asLeft[JWToken]
     }
   }
 
-  /*def userRegister(req: F[AuthRequest]): EitherT[F, String, JWToken] =
-    for {
-      authReq   <- req.attemptT.leftMap(t => t.getMessage)
-      hash      = HashGenerator.run(authReq.password.value)
-      user      = authReq.asUser(PasswordHash(hash))
-      user      <- repo.createUser(user, Instant.now())
-    } yield jwtEncode(user)*/
-
-  def userRegister(authRequest: AuthRequest): F[Either[String, JWToken]] = {
+  override def userRegister(authRequest: AuthRequest): F[Either[String, JWToken]] = {
     val passHash = HashGenerator.run(authRequest.password.value)
     val user = authRequest.asUser(PasswordHash(passHash))
-    repo.createUser(user, Instant.now()).flatMap{ a =>
-      Async[F].delay(a.map{_ =>
-        jwtEncode(AuthUser(user.username))
-      })
-    }
-
+    for {
+      e <- repo.createUser(user, Instant.now())
+    } yield e.map(_ => jwtEncode(AuthUser(user.username)))
   }
 
 }
