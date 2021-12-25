@@ -2,21 +2,21 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.purchase
 
 import cats.data.EitherT
 import cats.effect.Async
-import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.{Purchase, PurchasePrice, PurchaseSuccess, TrioExosCard}
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.{Purchase, PurchasePrice, PurchaseSuccess, ExoOldNewCardRequest}
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 import java.time.Instant
 import scala.concurrent.duration.DurationInt
 
 
 trait PurchaseServiceT[F[_]] {
-  def makePurchase(trio: TrioExosCard, userName: UserName): F[Either[String, PurchaseSuccess]]
+  def makePurchase(trio: ExoOldNewCardRequest, userName: UserName): F[Either[String, PurchaseSuccess]]
 }
 
 class PurchaseService[F[_]: Async](reservationService: ReservationServiceT[F],
                                    bankingService: BankingServiceT[F],
                                    repo: PurchaseRepositoryT[F]) extends PurchaseServiceT[F] {
 
-  override def makePurchase(trio: TrioExosCard, username: UserName): F[Either[String, PurchaseSuccess]] = {
+  override def makePurchase(trio: ExoOldNewCardRequest, username: UserName): F[Either[String, PurchaseSuccess]] = {
     (for {
       _      <- EitherT(reservationService.verifyAndExtendReservation(trio.exoplanetName, username, 5.minute))
       _      <- EitherT(bankingService.makePayment(trio.card, BigDecimal(4.99), SomeId("XXX555PPP")))

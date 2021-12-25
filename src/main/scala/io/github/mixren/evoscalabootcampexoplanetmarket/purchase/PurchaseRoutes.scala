@@ -7,7 +7,7 @@ import doobie.hikari.HikariTransactor
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepository
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.ExoplanetOfficialName
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.MapReservations.MapReservations
-import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.TrioExosCard
+import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.ExoOldNewCardRequest
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.AuthUser
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.Http4sDsl
@@ -48,7 +48,7 @@ object PurchaseRoutes {
       // curl http://localhost:8080/purchase/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "new super name", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
       case req @ POST -> Root / "purchase" / "exoplanet" as user =>
         (for {
-          trio <- req.req.as[TrioExosCard]
+          trio <- req.req.as[ExoOldNewCardRequest]
           res    <- purchaseService.makePurchase(trio, user.username)
           resp   <- res match {
             case Left(s)   => BadRequest(s)

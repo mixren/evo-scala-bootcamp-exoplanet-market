@@ -22,7 +22,7 @@ class PurchaseServiceTest extends AnyFlatSpec with MockFactory{
     purchaseRepositoryMock
   )
 
-  val trioExosCard: TrioExosCard = TrioExosCard(
+  val trioExosCard: ExoOldNewCardRequest = ExoOldNewCardRequest(
     ExoplanetOfficialName("exoOffName"),
     ExoplanetNewName("exoNewName"),
     fakeBankCard
