@@ -14,10 +14,10 @@ trait UserServiceT[F[_]]{
   def userRegister(authRequest: AuthRequest): F[Either[String, JWToken]]
 }
 
-class UserService[F[_]: Async](repo: UserRepository[F]) extends UserServiceT[F]{
+class UserService[F[_]: Async](repo: UserRepositoryT[F]) extends UserServiceT[F]{
 
   override def userLogin(authRequest: AuthRequest): F[Either[String, JWToken]] = {
-    val passHash = HashGenerator.run(authRequest.password.value)
+    val passHash = PasswordHash(HashGenerator.run(authRequest.password.value))
     for {
       userO <- repo.userByName(authRequest.username)
     } yield userO match {
@@ -31,8 +31,8 @@ class UserService[F[_]: Async](repo: UserRepository[F]) extends UserServiceT[F]{
   }
 
   override def userRegister(authRequest: AuthRequest): F[Either[String, JWToken]] = {
-    val passHash = HashGenerator.run(authRequest.password.value)
-    val user = authRequest.asUser(PasswordHash(passHash))
+    val passHash = PasswordHash(HashGenerator.run(authRequest.password.value))
+    val user = authRequest.asUser(passHash)
     for {
       e <- repo.createUser(user, Instant.now())
     } yield e.map(_ => jwtEncode(AuthUser(user.username)))
