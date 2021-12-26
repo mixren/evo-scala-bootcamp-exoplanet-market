@@ -21,3 +21,13 @@ object Main extends IOApp {
     }
   }
 }
+
+/*
+P.S.
+In case of this error:
+  java.net.BindException: Address already in use: bind
+Use this in cmd (for Windows) to find the task holding the port (last time it was java.exe):
+  netstat -ano | findstr :8080
+And kill it by (5160 is the PID found in the previous step):
+  taskkill /pid 5160 /f
+ */
