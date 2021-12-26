@@ -28,9 +28,9 @@ object PurchaseRoutes {
 
     AuthedRoutes.of[AuthUser, F] {
       // Reserve an exoplanet before purchasing one
-      // Fail:    curl http://localhost:8080/purchase/reserve/exoplanet -d '{"exoplanetName" : "Hal Oh 5G"}' -H "Content-Type: application/json"
-      // Success: curl http://localhost:8080/purchase/reserve/exoplanet -d '{"exoplanetName" : "2I/Borisov"}' -H "Content-Type: application/json"
-      case req @ POST -> Root / "purchase" / "reserve" / "exoplanet" as user =>
+      // Fail:    curl http://localhost:8080/purchase/auth/reserve/exoplanet -d '{"exoplanetName" : "Hal Oh 5G"}' -H "Content-Type: application/json"
+      // Success: curl http://localhost:8080/purchase/auth/reserve/exoplanet -d '{"exoplanetName" : "2I/Borisov"}' -H "Content-Type: application/json"
+      case req @ POST -> Root / "purchase" / "auth" / "reserve" / "exoplanet" as user =>
         (for {
           exoName   <- req.req.as[ExoplanetOfficialName]
           reserved  <- reservationService.reserveExoplanet(exoName, user.username, 5.minutes)
@@ -45,8 +45,8 @@ object PurchaseRoutes {
           }
 
       // Purchase Exoplanet
-      // curl http://localhost:8080/purchase/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "new super name", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
-      case req @ POST -> Root / "purchase" / "exoplanet" as user =>
+      // curl http://localhost:8080/purchase/auth/exoplanet -d '{"exoplanetName" : "2I/Borisov", "exoplanetNewName" : "new super name", "card" : {"cardHolderName" : "Manny", "cardNumber" : "111122223333", "cardExpiration" : "2030-12", "cardCvc" : "123"}}' -H "Content-Type: application/json"
+      case req @ POST -> Root / "purchase" / "auth" / "exoplanet" as user =>
         (for {
           trio <- req.req.as[ExoOldNewCardRequest]
           res    <- purchaseService.makePurchase(trio, user.username)
@@ -61,8 +61,8 @@ object PurchaseRoutes {
           }
 
       // Get all purchases by user
-      // curl http://localhost:8080/purchase/history/user
-      case GET -> Root / "purchase" / "history" / "user" as user =>
+      // curl http://localhost:8080/purchase/auth/history/user
+      case GET -> Root / "purchase" / "auth"/ "history" / "user" as user =>
         Ok(purRepo.purchasesByUser(user.username))
 
     }

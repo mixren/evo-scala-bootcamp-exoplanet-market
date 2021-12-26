@@ -67,9 +67,9 @@ object UserRoutes {
     import dsl._
 
     AuthedRoutes.of[AuthUser, F] {
-      // curl http://localhost:8080/auth/loggedin --header "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Mzk2OTIxODYsImlhdCI6MTYzOTYwNTc4NiwidXNlck5hbWUiOiJKb2huIiwicGFzc3dvcmRIYXNoIjoiOGQ5NjllZWY2ZWNhZDNjMjlhM2E2MjkyODBlNjg2Y2YwYzNmNWQ1YTg2YWZmM2NhMTIwMjBjOTIzYWRjNmM5MiJ9.kz_4dKv9TixNcuk1_qz_X8qYZ4ZtKPDk5Zpg5DfSPZk"
+      // curl http://localhost:8080/user/auth/loggedin --header "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Mzk2OTIxODYsImlhdCI6MTYzOTYwNTc4NiwidXNlck5hbWUiOiJKb2huIiwicGFzc3dvcmRIYXNoIjoiOGQ5NjllZWY2ZWNhZDNjMjlhM2E2MjkyODBlNjg2Y2YwYzNmNWQ1YTg2YWZmM2NhMTIwMjBjOTIzYWRjNmM5MiJ9.kz_4dKv9TixNcuk1_qz_X8qYZ4ZtKPDk5Zpg5DfSPZk"
       // Check if user is logged-in by passing JWT token.
-      case GET -> Root / "auth" / "loggedin" as user =>
+      case GET -> Root / "user" / "auth" / "loggedin" as user =>
         Ok(s"${user.username.value} is logged in")
 
     }
