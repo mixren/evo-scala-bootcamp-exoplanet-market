@@ -19,4 +19,6 @@ class FakeExoplanetRepository[F[_]: Async] extends ExoplanetRepositoryT[F] {
 
   override def exoplanetByName(exoplanetName: ExoplanetOfficialName): F[Option[Exoplanet]] =
     Async[F].delay(exoplanets.find(_.officialName equals exoplanetName))
+
+  override def fetchExoplanetsRandomly(amount: Int): F[List[Exoplanet]] = Async[F].pure(exoplanets.toList)
 }

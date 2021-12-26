@@ -22,6 +22,10 @@ object ExoplanetRoutes {
       case GET -> Root / "exoplanets" / "all" =>
         Ok(repo.fetchAllExoplanets)
 
+      case GET -> Root / "exoplanets" / "random" / amount =>
+        if (amount.matches("^[0-9]+$")) Ok(repo.fetchExoplanetsRandomly(amount.toInt))
+        else BadRequest(s"Amount should be an integer, not \"$amount\" ")
+
     }
   }
 
