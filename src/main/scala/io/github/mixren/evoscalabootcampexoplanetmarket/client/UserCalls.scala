@@ -48,7 +48,7 @@ object UserCalls {
         OptionT.liftF {
           val target = uri / "user" / "auth" / "loggedin"
           ref.get.flatMap{
-            case None         => Async[F].pure("Not valid token")
+            case None         => Async[F].pure("Not valid token. Login first.")
             case Some(token)  => client.expect[String](Request[F](GET, target).withHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token.value))))
           }
         }
