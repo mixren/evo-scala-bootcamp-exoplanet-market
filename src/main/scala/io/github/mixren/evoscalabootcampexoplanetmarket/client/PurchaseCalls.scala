@@ -15,6 +15,10 @@ import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
 import io.circe.syntax.EncoderOps
 
 
+/**
+ * Purchase routes calls.
+ * These routes are located in the Server's PurchaseRoutes file.
+ */
 object PurchaseCalls {
 
   def removeQuotes(str: String): String = str.stripPrefix("\"").stripSuffix("\"")

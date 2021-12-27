@@ -9,6 +9,11 @@ import org.http4s.Uri
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
 import org.http4s.client.Client
 
+
+/**
+ * Exoplanets routes calls.
+ * These routes are located in the Server's ExoplanetsRoutes file.
+ */
 object ExoplanetsCalls {
 
   def apply[F[_]: Async](client: Client[F],

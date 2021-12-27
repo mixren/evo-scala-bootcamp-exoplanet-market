@@ -11,6 +11,10 @@ import org.http4s.headers.Authorization
 import org.http4s.{AuthScheme, Credentials, Request, Response, Uri}
 
 
+/**
+ * User routes calls.
+ * These routes are located in the Server's UserRoutes file.
+ */
 object UserCalls {
 
   def getToken[F[_]](response: Response[F]): Option[JWToken] = response.headers.get[Authorization] match {
