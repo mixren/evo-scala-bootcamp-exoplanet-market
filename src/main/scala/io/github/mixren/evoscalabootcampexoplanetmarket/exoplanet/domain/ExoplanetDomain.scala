@@ -49,14 +49,14 @@ object Exoplanet {
 
 case class ExoplanetOfficialName(name: String) extends AnyVal
 object ExoplanetOfficialName {
-  def isValidName(str: String): Boolean = str.trim.nonEmpty && str.trim.length == str.length && str.length > 2
+  def isValidName(str: String): Boolean = str.trim.nonEmpty && !str.contains(':') && str.trim.length  == str.length && str.length > 2
 
   def of(value: String): Option[ExoplanetOfficialName] = value match {
     case v if isValidName(v) => Some(ExoplanetOfficialName(v))
     case _ => None
   }
 
-  val strError: String = "Invalid exoplanet name. Username should not be surrounded by spaces and should have 3 or more characters."
+  val strError: String = "Invalid exoplanet name. Username should not be surrounded by spaces, not contain : symbol and should have 3 or more characters."
   implicit val decoder: Decoder[ExoplanetOfficialName] = deriveUnwrappedDecoder[ExoplanetOfficialName].validate(
     _.value.asString match {
       case Some(value) => isValidName(value)

@@ -23,14 +23,14 @@ object User{
 
 case class UserName private(value: String) extends AnyVal
 object UserName {
-  def isValidName(str: String): Boolean = str.trim.nonEmpty && !str.contains(' ') && str.length > 2
+  def isValidName(str: String): Boolean = str.trim.nonEmpty && !str.contains(' ') && !str.contains(':')  && str.length > 2
 
   def of(value: String): Option[UserName] = value match {
     case v if isValidName(v) => Some(UserName(v))
     case _ => None
   }
 
-  val strError: String = "Invalid username. Username should not not contain spaces and should have 3 or more characters."
+  val strError: String = "Invalid username. Username should not not contain spaces and : symbol, and should have 3 or more characters."
   implicit val decoder: Decoder[UserName] = deriveUnwrappedDecoder[UserName].validate(
     _.value.asString match {
       case Some(value) => isValidName(value)
