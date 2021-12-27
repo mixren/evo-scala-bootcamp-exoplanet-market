@@ -11,6 +11,7 @@ trait ExoplanetRepositoryT[F[_]] {
   def fetchAllExoplanets: F[List[Exoplanet]]
   def deleteAllExoplanets(): F[Int]
   def exoplanetByName(exoplanetName: ExoplanetOfficialName): F[Option[Exoplanet]]
+  def fetchExoplanetsRandomly(amount: Int): F[List[Exoplanet]]
 }
 
 class ExoplanetRepository[F[_]: Async](implicit xa: HikariTransactor[F]) extends ExoplanetRepositoryT[F] {
@@ -48,5 +49,11 @@ class ExoplanetRepository[F[_]: Async](implicit xa: HikariTransactor[F]) extends
       .option
       .transact(xa)
   }
+
+  override def fetchExoplanetsRandomly(amount: Int): F[List[Exoplanet]] =
+    sql"""SELECT * FROM exoplanets ORDER BY RANDOM() LIMIT $amount"""
+      .query[Exoplanet]
+      .to[List]
+      .transact(xa)
 
 }
