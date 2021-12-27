@@ -39,6 +39,7 @@ handy for complex CSVs where commas are where not expected
 8) https://jwt.io/introduction - JSON Web Token based authentication
 9) https://jwt-scala.github.io/jwt-scala/jwt-circe.html - JWT usage with Circe codecs
 10) https://flywaydb.org/documentation/concepts/migrations.html - DB migrations. Useful for DB consistency and transparency.
+11) https://scalamock.org/quick-start/ - no need to write mocks/stubs of a whole trait with this one
 
 ## Current State
 - Quickstarted the http4s Server with "HelloWorld" endpoint.
@@ -53,9 +54,12 @@ handy for complex CSVs where commas are where not expected
 - Exoplanets can be reserved with timeout by an authenticated user
 - Exoplanets can be purchased by an authenticated user
 - Purchased exoplanets can be shown
+- Essential tests
+- Client with console interface
 
 ### To do:
-1) Write tests!!!!
-2) Maybe add some generous offer - pay 2 for 3 names. Then Ill need to store this info somewhere.
+1) mb write more tests?!!
+2) work a bit more on the client
+3) Maybe add some generous offer - pay 2 for 3 names. Then Ill need to store this info somewhere.
 Might be unfair when all planets taken.
-3) Fetch exoplanets .csv from http://exoplanet.eu/catalog/csv via routes
+4) Fetch exoplanets .csv from http://exoplanet.eu/catalog/csv via routes
