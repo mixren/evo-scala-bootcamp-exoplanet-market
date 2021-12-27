@@ -30,18 +30,32 @@ class PurchaseServiceTest extends AnyFlatSpec with MockFactory{
 
   "PurchaseService" should "successfully process the exoplanet name purchase in case the user-purchaser" +
     " anticipatorily reserved the exoplanet and the payment is processed sucessfully." in {
-
     (reservationServiceMock.verifyAndExtendReservation _).expects(trioExosCard.exoplanetName, validUsername1, *).returning(IO.pure(().asRight))
     (bankingServiceMock.makePayment _).expects(trioExosCard.card, *, *).returning(IO.pure(PaymentSuccessful("").asRight))
     (purchaseRepositoryMock.addPurchase _).expects(*).returning(IO.pure(0.asRight))
     (reservationServiceMock.releaseReservation _).expects(trioExosCard.exoplanetName, validUsername1).returning(IO.pure(().asRight))
     assert(purchaseService.makePurchase(trioExosCard, validUsername1).unsafeRunSync().isRight)
+  }
 
+  it should "not allow to process the purchase when exoplanet reservation verification fails" in {
     (reservationServiceMock.verifyAndExtendReservation _).expects(*, *, *).returning(IO.pure("".asLeft))
+    (reservationServiceMock.releaseReservation _).expects(trioExosCard.exoplanetName, validUsername1).returning(IO.pure(().asRight))
     assert(purchaseService.makePurchase(trioExosCard, validUsername1).unsafeRunSync().isLeft)
+  }
 
+  it should "not allow to process the purchase if payment is unsuccessful" in {
     (reservationServiceMock.verifyAndExtendReservation _).expects(*, *, *).returning(IO.pure(().asRight))
     (bankingServiceMock.makePayment _).expects(*, *, *).returning(IO.pure("".asLeft))
+    (reservationServiceMock.releaseReservation _).expects(trioExosCard.exoplanetName, validUsername1).returning(IO.pure(().asRight))
     assert(purchaseService.makePurchase(trioExosCard, validUsername1).unsafeRunSync().isLeft)
-    }
+  }
+
+  it should "not depend on the exoplanet reservation release result" in {
+    (reservationServiceMock.verifyAndExtendReservation _).expects(trioExosCard.exoplanetName, validUsername1, *).returning(IO.pure(().asRight))
+    (bankingServiceMock.makePayment _).expects(trioExosCard.card, *, *).returning(IO.pure(PaymentSuccessful("").asRight))
+    (purchaseRepositoryMock.addPurchase _).expects(*).returning(IO.pure(0.asRight))
+    (reservationServiceMock.releaseReservation _).expects(trioExosCard.exoplanetName, validUsername1).returning(IO.pure("".asLeft))
+    assert(purchaseService.makePurchase(trioExosCard, validUsername1).unsafeRunSync().isRight)
+  }
+
 }

@@ -5,7 +5,7 @@ import cats.effect.kernel.Ref
 import cats.effect.unsafe.implicits.global
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.ExoplanetRepositoryT
 import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.FakeExoplanets._
-import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.FakePurchases.purEx3U3
+import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.FakePurchases.{purEx1U1, purEx2U2}
 import io.github.mixren.evoscalabootcampexoplanetmarket.fakes.FakeUsers._
 import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.MapReservations.MapReservations
 import org.scalamock.scalatest.MockFactory
@@ -19,103 +19,251 @@ class ReservationServiceTest extends AnyFlatSpec with MockFactory{
   val exoplanetRepositoryStub: ExoplanetRepositoryT[IO] = stub[ExoplanetRepositoryT[IO]]
   val purchaseRepositoryStub: PurchaseRepositoryT[IO]   = stub[PurchaseRepositoryT[IO]]
 
-  val reservationService = new ReservationService[IO](
-    exoplanetRepositoryStub,
-    purchaseRepositoryStub,
-    Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
-  )
-
-  val reservationDuration: FiniteDuration = 5.seconds
+  val reservationDuration: FiniteDuration = 1.minute
 
 
-  "ReservationService" should "let users reserve exoplanets not reserved by other users and not purchased" in {
+  "ReservationService" should "let users reserve not purchased and not reserved exoplanets" in {
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
     exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
     exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
     exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName3 returns IO.pure(Some(exo3))
 
     purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
     purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
-    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName3 returns IO.pure(Some(purEx3U3))
-
-    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, reservationDuration)
-    val reserveEx1U2 = reservationService.reserveExoplanet(realExoplanetName1, validUsername2, reservationDuration)
-    val reserveEx2U2 = reservationService.reserveExoplanet(realExoplanetName2, validUsername2, reservationDuration)
-    val reserveEx3U1 = reservationService.reserveExoplanet(realExoplanetName3, validUsername1, reservationDuration)
-
-    assert(reserveEx1U1.unsafeRunSync().isRight)
-    assert(reserveEx1U1.unsafeRunSync().isRight)
-    assert(reserveEx1U2.unsafeRunSync().isLeft)
-    assert(reserveEx2U2.unsafeRunSync().isRight)
-    assert(reserveEx3U1.unsafeRunSync().isLeft)
-  }
-
-  it should "verify reservations and, if successful, extend them" in {
-    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName3 returns IO.pure(Some(exo3))
-
     purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName3 returns IO.pure(None)
 
-    val reserveEx3U3  = reservationService.reserveExoplanet(          realExoplanetName3, validUsername3, reservationDuration)
-    val verify_Ex3U3  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername3, reservationDuration)
-    val verify_Ex3U1  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername1, reservationDuration)
-
-    assert(verify_Ex3U3.unsafeRunSync().isLeft)
-    assert(reserveEx3U3.unsafeRunSync().isRight)
-    assert(verify_Ex3U3.unsafeRunSync().isRight)
-    assert(verify_Ex3U1.unsafeRunSync().isLeft)
-  }
-
-  it should "release reservation by the same user" in {
-    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName4 returns IO.pure(Some(exo4))
-
-    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName4 returns IO.pure(None)
-
-    val reserveEx4U4 = reservationService.reserveExoplanet(  realExoplanetName4, validUsername4, reservationDuration)
-    val releaseEx4U3 = reservationService.releaseReservation(realExoplanetName4, validUsername3)
-    val releaseEx4U4 = reservationService.releaseReservation(realExoplanetName4, validUsername4)
-
-    assert(reserveEx4U4.unsafeRunSync().isRight)
-    assert(releaseEx4U3.unsafeRunSync().isLeft)
-    assert(releaseEx4U4.unsafeRunSync().isRight)
-  }
-
-/*
-  // Working shit
-  val reservationService = new ReservationService[IO](
-    new FakeExoplanetRepository[IO](),
-    new FakePurchaseRepository[IO](),
-    Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
-  )
-
-
-
-  "ReservationService" should "let users reserve exoplanets not reserved by other users" in {
     val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, reservationDuration)
+    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, reservationDuration)
+    val reserveEx3U2 = reservationService.reserveExoplanet(realExoplanetName3, validUsername2, reservationDuration)
+
+    assert(reserveEx1U1.unsafeRunSync().isRight)
+    assert(reserveEx2U1.unsafeRunSync().isRight)
+    assert(reserveEx3U2.unsafeRunSync().isRight)
+  }
+
+  it should "not allow users to reserve exoplanets already reserved by other users" in {
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
+
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
+
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, reservationDuration)
+    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, reservationDuration)
     val reserveEx1U2 = reservationService.reserveExoplanet(realExoplanetName1, validUsername2, reservationDuration)
     val reserveEx2U2 = reservationService.reserveExoplanet(realExoplanetName2, validUsername2, reservationDuration)
-    assert(reserveEx1U1.unsafeRunSync().isRight)
-    assert(reserveEx1U1.unsafeRunSync().isRight)
+
+    reserveEx1U1.unsafeRunSync()
+    reserveEx2U1.unsafeRunSync()
+
     assert(reserveEx1U2.unsafeRunSync().isLeft)
+    assert(reserveEx2U2.unsafeRunSync().isLeft)
+  }
+
+  it should "let users to reserve previously reserved exoplanets by any users, which reservations are timeout" in {
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
+    val oneSecondReservation = 1.second
+
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
+
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
+
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, oneSecondReservation)
+    val reserveEx2U2 = reservationService.reserveExoplanet(realExoplanetName2, validUsername2, oneSecondReservation)
+    val reserveEx1U2 = reservationService.reserveExoplanet(realExoplanetName1, validUsername2, oneSecondReservation)
+
+    reserveEx1U1.unsafeRunSync()
+    reserveEx2U2.unsafeRunSync()
+    IO.sleep(1.second).unsafeRunSync()
+
+    assert(reserveEx1U2.unsafeRunSync().isRight)
     assert(reserveEx2U2.unsafeRunSync().isRight)
   }
 
-  it should "verify reservations and, if successful, extend them" in {
-    val reserveEx3U3  = reservationService.reserveExoplanet(          realExoplanetName3, validUsername3, reservationDuration)
-    val verify_Ex3U3  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername3, reservationDuration)
-    val verify_Ex3U1  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername1, reservationDuration)
-    assert(verify_Ex3U3.unsafeRunSync().isLeft)
-    assert(reserveEx3U3.unsafeRunSync().isRight)
-    assert(verify_Ex3U3.unsafeRunSync().isRight)
-    assert(verify_Ex3U1.unsafeRunSync().isLeft)
+  it should "not allow users to reserve already purchased exoplanets" in {
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
+
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(Some(purEx1U1))
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(Some(purEx2U2))
+
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, reservationDuration)
+    val reserveEx1U2 = reservationService.reserveExoplanet(realExoplanetName1, validUsername2, reservationDuration)
+    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, reservationDuration)
+
+    assert(reserveEx1U1.unsafeRunSync().isLeft)
+    assert(reserveEx1U2.unsafeRunSync().isLeft)
+    assert(reserveEx2U1.unsafeRunSync().isLeft)
+  }
+
+  it should "successfully verify and extend valid exoplanet reservations for the users, which reserved it earlier" in {
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName3 returns IO.pure(Some(exo3))
+
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName3 returns IO.pure(None)
+
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, reservationDuration)
+    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, reservationDuration)
+    val reserveEx3U2 = reservationService.reserveExoplanet(realExoplanetName3, validUsername2, reservationDuration)
+
+    val verify_Ex1U1  = reservationService.verifyAndExtendReservation(realExoplanetName1, validUsername1, reservationDuration)
+    val verify_Ex2U1  = reservationService.verifyAndExtendReservation(realExoplanetName2, validUsername1, reservationDuration)
+    val verify_Ex3U2  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername2, reservationDuration)
+
+    reserveEx1U1.unsafeRunSync()
+    reserveEx2U1.unsafeRunSync()
+    reserveEx3U2.unsafeRunSync()
+
+    assert(verify_Ex1U1.unsafeRunSync().isRight)
+    assert(verify_Ex2U1.unsafeRunSync().isRight)
+    assert(verify_Ex3U2.unsafeRunSync().isRight)
+  }
+
+  it should "fail exoplanet reservation verification for users that not reserved particular exoplanet" in {
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName3 returns IO.pure(Some(exo3))
+
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName3 returns IO.pure(None)
+
+    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, reservationDuration)
+
+    val verify_Ex1U1  = reservationService.verifyAndExtendReservation(realExoplanetName1, validUsername1, reservationDuration)
+    val verify_Ex2U2  = reservationService.verifyAndExtendReservation(realExoplanetName2, validUsername2, reservationDuration)
+    val verify_Ex3U2  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername2, reservationDuration)
+
+    reserveEx2U1.unsafeRunSync()
+
+    assert(verify_Ex1U1.unsafeRunSync().isLeft)
+    assert(verify_Ex2U2.unsafeRunSync().isLeft)
+    assert(verify_Ex3U2.unsafeRunSync().isLeft)
+  }
+
+  it should "fail exoplanet reservation verification if the reservation is timeout" in {
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
+    val oneSecondReservation = 1.second
+
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName3 returns IO.pure(Some(exo3))
+
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName3 returns IO.pure(None)
+
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, oneSecondReservation)
+    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, oneSecondReservation)
+    val reserveEx3U2 = reservationService.reserveExoplanet(realExoplanetName3, validUsername2, oneSecondReservation)
+
+    val verify_Ex1U1  = reservationService.verifyAndExtendReservation(realExoplanetName1, validUsername1, reservationDuration)
+    val verify_Ex2U1  = reservationService.verifyAndExtendReservation(realExoplanetName2, validUsername1, reservationDuration)
+    val verify_Ex3U2  = reservationService.verifyAndExtendReservation(realExoplanetName3, validUsername2, reservationDuration)
+
+    reserveEx1U1.unsafeRunSync()
+    reserveEx2U1.unsafeRunSync()
+    reserveEx3U2.unsafeRunSync()
+    IO.sleep(1.second).unsafeRunSync()
+
+    assert(verify_Ex1U1.unsafeRunSync().isLeft)
+    assert(verify_Ex2U1.unsafeRunSync().isLeft)
+    assert(verify_Ex3U2.unsafeRunSync().isLeft)
   }
 
   it should "release reservation by the same user" in {
-    val reserveEx4U4 = reservationService.reserveExoplanet(  realExoplanetName4, validUsername4, reservationDuration)
-    val releaseEx4U3 = reservationService.releaseReservation(realExoplanetName4, validUsername3)
-    val releaseEx4U4 = reservationService.releaseReservation(realExoplanetName4, validUsername4)
-    assert(reserveEx4U4.unsafeRunSync().isRight)
-    assert(releaseEx4U3.unsafeRunSync().isLeft)
-    assert(releaseEx4U4.unsafeRunSync().isRight)
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName3 returns IO.pure(Some(exo3))
+
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName3 returns IO.pure(None)
+
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, reservationDuration)
+    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, reservationDuration)
+    val reserveEx3U2 = reservationService.reserveExoplanet(realExoplanetName3, validUsername2, reservationDuration)
+
+    val releaseEx1U1 = reservationService.releaseReservation(realExoplanetName1, validUsername1)
+    val releaseEx2U1 = reservationService.releaseReservation(realExoplanetName2, validUsername1)
+    val releaseEx3U2 = reservationService.releaseReservation(realExoplanetName3, validUsername2)
+
+    reserveEx1U1.unsafeRunSync()
+    reserveEx2U1.unsafeRunSync()
+    reserveEx3U2.unsafeRunSync()
+
+    assert(releaseEx1U1.unsafeRunSync().isRight)
+    assert(releaseEx2U1.unsafeRunSync().isRight)
+    assert(releaseEx3U2.unsafeRunSync().isRight)
   }
-*/
+
+  it should "not allow to release reservation by another user" in {
+    val reservationService = new ReservationService[IO](
+      exoplanetRepositoryStub,
+      purchaseRepositoryStub,
+      Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
+    )
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
+    exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName3 returns IO.pure(Some(exo3))
+
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
+    purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName3 returns IO.pure(None)
+
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, reservationDuration)
+    val reserveEx2U2 = reservationService.reserveExoplanet(realExoplanetName2, validUsername2, reservationDuration)
+
+    val releaseEx1U2 = reservationService.releaseReservation(realExoplanetName1, validUsername2)
+    val releaseEx2U1 = reservationService.releaseReservation(realExoplanetName2, validUsername1)
+
+    reserveEx1U1.unsafeRunSync()
+    reserveEx2U2.unsafeRunSync()
+
+    assert(releaseEx1U2.unsafeRunSync().isLeft)
+    assert(releaseEx2U1.unsafeRunSync().isLeft)
+  }
 
 }

@@ -23,15 +23,21 @@ class UserServiceTest extends AnyFlatSpec with MockFactory{
 
   "UserService" should "register users if they are not registered yet and return an authentication token" in{
     userRepositoryStub.createUser _ when (user1, *) returns IO.pure(0.asRight)
-    userRepositoryStub.createUser _ when (user2, *) returns IO.pure("already in db".asLeft)
     assert(userService.userRegister(authRequest1).unsafeRunSync().isRight)
+  }
+
+  "UserService" should "block users registration if they are registered" in{
+    userRepositoryStub.createUser _ when (user2, *) returns IO.pure("already in db".asLeft)
     assert(userService.userRegister(authRequest2).unsafeRunSync().isLeft)
   }
 
   it should "login registered users and return an authentication token" in{
     userRepositoryStub.userByName _ when authRequest1.username returns IO.pure(Some(user1))
-    userRepositoryStub.userByName _ when authRequest2.username returns IO.pure(None)
     assert(userService.userLogin(authRequest1).unsafeRunSync().isRight)
+  }
+
+  it should "block users from login if they are not registered" in{
+    userRepositoryStub.userByName _ when authRequest2.username returns IO.pure(None)
     assert(userService.userLogin(authRequest2).unsafeRunSync().isLeft)
   }
 }
