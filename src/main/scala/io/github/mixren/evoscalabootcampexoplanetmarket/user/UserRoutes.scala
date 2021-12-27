@@ -6,7 +6,8 @@ import doobie.hikari.HikariTransactor
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.{AuthRequest, AuthUser}
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{AuthedRoutes, HttpRoutes, InvalidMessageBodyFailure}
+import org.http4s.headers.Authorization
+import org.http4s.{AuthScheme, AuthedRoutes, Credentials, HttpRoutes, InvalidMessageBodyFailure}
 
 
 object UserRoutes {
@@ -22,18 +23,13 @@ object UserRoutes {
       // Call: curl http://localhost:8080/user/login -d '{"userName": "John", "password": "123456"}' -H "Content-Type: application/json"
       // Login user. Return JWT if user is registered, else error
       case req @ POST -> Root / "user" / "login" =>
-        /*val res = userService.userLogin(req.as[AuthRequest])
-        res.value.flatMap{
-          case Right(token)  => Ok(s"Login successful. Authorization token:\n$token")
-          case Left(err)     => Conflict(s"$err")
-        }*/
-        // Or smth like this? \/
         (for {
           authReq <- req.as[AuthRequest]
           res <- userService.userLogin(authReq)
           resp <- res match {
             case Left(s) => BadRequest(s)
-            case Right(token) => Ok(s"Login successful. Authorization token: ${token.value}")
+            case Right(token) => Ok(s"Login successful. Authorization token: ${token.value}",
+              Authorization(Credentials.Token(AuthScheme.Bearer, token.value)))
           }
         } yield resp)
           .handleErrorWith {
@@ -50,7 +46,8 @@ object UserRoutes {
           res     <- userService.userRegister(authReq)
           resp    <- res match {
             case Left(s)   => BadRequest(s)
-            case Right(token) => Ok(s"Registration successful. Authorization token: ${token.value}")
+            case Right(token) => Ok(s"Registration successful. Authorization token: ${token.value}",
+              Authorization(Credentials.Token(AuthScheme.Bearer, token.value)))
           }
         } yield resp)
           .handleErrorWith {
