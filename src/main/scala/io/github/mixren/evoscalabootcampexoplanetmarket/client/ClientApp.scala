@@ -9,7 +9,7 @@ import org.http4s.implicits.http4sLiteralsSyntax
 /**
  * Client for the ExoplanetMarket Server.
  * It uses a command line interface, which makes use of all server routes.
- * Tip: When running type "help" and hit Enter to see all Client commands!
+ * Tip: When running type "help" and hit Enter to see all Client commands!!
  */
 object ClientApp extends IOApp {
   val uri = uri"http://localhost:8080/"
