@@ -27,7 +27,6 @@ class PurchaseService[F[_]: Async](reservationService: ReservationServiceT[F],
         username,
         PurchasePrice(BigDecimal(4.99)),
         Instant.now().toEpochMilli)) )      // TODO db write by repo.addPurchase still can fail. Although, very not likely, but why not to consider some fallback
-      _      <- EitherT.right[String](reservationService.releaseReservation(trio.exoplanetName, username))
     } yield PurchaseSuccess.of(username, trio.exoplanetName, trio.exoplanetNewName)
 
     // No matter what's the result of the purchase, reservation is released at the end.
