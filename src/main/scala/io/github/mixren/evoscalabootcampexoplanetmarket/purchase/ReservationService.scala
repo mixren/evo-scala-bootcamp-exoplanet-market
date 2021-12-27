@@ -17,8 +17,21 @@ object ReservationResult {
 }
 */
 trait ReservationServiceT[F[_]] {
+  /**
+   *  Reserve an exoplanet for a user.
+   *  Is reserved only if the exoplanet exists, not purchased and not reserved for another user at the moment.
+   *  Re-reservation by the same user is possible.
+   */
   def reserveExoplanet(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]]
+  /**
+   *  Verify reservation.
+   *  If successfully verified, the reservations gets extended by the given amount.
+   */
   def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]]
+  /**
+   *  Release exoplanet reservation by user.
+   *  No release if the reservation is made by another user.
+   */
   def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Either[String,Unit]]
 }
 
@@ -48,6 +61,8 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
   private def reserve(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration)=
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
+        case Some((sameUsername, deadline)) if sameUsername != username && deadline.isOverdue() =>
+          (state.updated(exoplanetName, (username, reservationDuration.fromNow)), success(exoplanetName, username, reservationDuration))
         case Some((sameUsername, _)) if sameUsername equals username  =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), success(exoplanetName, username, reservationDuration))
         case None                                                     =>
@@ -57,11 +72,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
       }
     }
 
-  /**
-   *  Reserve an exoplanet for a user.
-   *  Is reserved only if the exoplanet exists, not purchased and not reserved for another user at the moment.
-   *  Re-reservation by the same user is possible.
-   */
+
   override def reserveExoplanet(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, String]] = {
     for {
       exoO  <- exoRepo.exoplanetByName(exoplanetName)
@@ -75,10 +86,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
   }
 
 
-  /**
-   *  Verify reservation.
-   *  If successfully verified, the reservations gets extended by the given amount.
-   */
+
   override def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
@@ -89,10 +97,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
       }
     }
 
-  /**
-   *  Release exoplanet reservation by user.
-   *  No release if the reservation is made by another user.
-   */
+
   override def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
