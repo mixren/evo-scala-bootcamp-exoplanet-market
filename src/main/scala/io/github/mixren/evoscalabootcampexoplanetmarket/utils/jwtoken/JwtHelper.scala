@@ -16,17 +16,16 @@ object JwtHelper {
   private val expirationSec: Long = 24 * 3600
 
   /**
-   * Token for authenticated requests.
+   * Encode user info into token. Token is used in the authenticated requests.
    * Uses external library.
    *
-   * @param username Login username
-   * @return JWT token, which of form:
+   * @return JWT token, which has form:
    *         "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.
    *         eyJleHAiOjE3OTExMjMyNTYsImlhdCI6MTYzMzMzODQ5Nn0.
    *         mvDSTVzGgZvhBf6Iw7zdijJ3bFozj9UeJkelFyr-pws"
    */
-  def jwtEncode(username: AuthUser): JWToken = {
-    val userJson = username.asJson.noSpaces
+  def jwtEncode(authUser: AuthUser): JWToken = {
+    val userJson = authUser.asJson.noSpaces
     val claim = JwtClaim(content = userJson)
       .issuedNow
       .expiresIn(expirationSec)
@@ -34,7 +33,8 @@ object JwtHelper {
   }
 
   def tokenDecode(token: JWToken): Either[String, JwtClaim] = {
-    JwtCirce.decode(token.value, key, Seq(algo)).toEither.leftMap(_ => "Error decoding jwt claim from token")
+    JwtCirce.decode(token.value, key, Seq(algo)).toEither.leftMap(_
+    => "Error decoding jwt claim from token. The token might be not valid.")
   }
 
 

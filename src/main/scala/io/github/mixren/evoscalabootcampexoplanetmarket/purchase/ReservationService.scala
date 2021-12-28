@@ -10,12 +10,6 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.UserName
 import scala.concurrent.duration.FiniteDuration
 
 
-/*
-sealed trait ReservationResult
-object ReservationResult {
-  case class SpecificError(msg: String) extends Error
-}
-*/
 trait ReservationServiceT[F[_]] {
   /**
    *  Reserve an exoplanet for a user.
@@ -52,7 +46,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
     s"Reservation failed. Exoplanet ${exoplanetName.name} is purchased already".asLeft
 
   private def noReservation(exoplanetName: ExoplanetOfficialName, username: UserName): Either[String, Unit] =
-    s"Error. No ${exoplanetName.name} reservation for ${username.value}".asLeft
+    s"Error. No valid ${exoplanetName.name} reservation for ${username.value}".asLeft
 
   private def noRelease(exoplanetName: ExoplanetOfficialName, username: UserName): Either[String, Unit] =
     (s"Error. Can't release ${exoplanetName.name} reservation for ${username.value}." +
