@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.client
+package io.github.mixren.evoscalabootcampexoplanetmarket.client.calls
 
 import cats.data.{Kleisli, OptionT}
 import cats.effect.kernel.{Async, Ref}
@@ -10,7 +10,6 @@ import org.http4s.client.Client
 import org.http4s.headers.Authorization
 import org.http4s.{AuthScheme, Credentials, Request, Response, Uri}
 
-
 /**
  * User routes calls.
  * These routes are located in the Server's UserRoutes file.
@@ -19,16 +18,16 @@ object UserCalls {
 
   def getToken[F[_]](response: Response[F]): Option[JWToken] = response.headers.get[Authorization] match {
     case Some(Authorization(Credentials.Token(AuthScheme.Bearer, token))) => Some(JWToken(token))
-    case _  => None
+    case _ => None
   }
 
-  def apply[F[_]: Async](client: Client[F],
-                         uri: Uri,
-                         tokenRef :Ref[F, Option[JWToken]]
-                        ): Kleisli[OptionT[F, *], List[String], String] =
+  def apply[F[_] : Async](client: Client[F],
+                          uri: Uri,
+                          tokenRef: Ref[F, Option[JWToken]]
+                         ): Kleisli[OptionT[F, *], List[String], String] =
 
     Kleisli[OptionT[F, *], List[String], String] {
-      case "login" :: username :: password :: Nil                                            =>
+      case "login" :: username :: password :: Nil =>
         OptionT.liftF {
           val target = uri / "user" / "login"
           val body = AuthRequest(UserName(username), AuthPassword(password))
@@ -38,7 +37,7 @@ object UserCalls {
           }
         }
 
-      case "register" :: username :: password :: Nil                                            =>
+      case "register" :: username :: password :: Nil =>
         OptionT.liftF {
           val target = uri / "user" / "register"
           val body = AuthRequest(UserName(username), AuthPassword(password))
@@ -48,16 +47,16 @@ object UserCalls {
           }
         }
 
-      case "auth" :: "loggedin" :: Nil                                            =>
+      case "auth" :: "loggedin" :: Nil =>
         OptionT.liftF {
           val target = uri / "user" / "auth" / "loggedin"
-          tokenRef.get.flatMap{
-            case None         => Async[F].pure("Not valid token. Login first.")
-            case Some(token)  => client.expect[String](Request[F](GET, target).withHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token.value))))
+          tokenRef.get.flatMap {
+            case None => Async[F].pure("Not valid token. Login first.")
+            case Some(token) => client.expect[String](Request[F](GET, target).withHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token.value))))
           }
         }
 
-      case _                                                         =>
+      case _ =>
         OptionT.none
     }
 

@@ -1,4 +1,4 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.client
+package io.github.mixren.evoscalabootcampexoplanetmarket.client.calls
 
 import cats.data.{Kleisli, OptionT}
 import cats.effect.kernel.Async
@@ -9,32 +9,31 @@ import org.http4s.Uri
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
 import org.http4s.client.Client
 
-
 /**
  * Exoplanets routes calls.
  * These routes are located in the Server's ExoplanetsRoutes file.
  */
 object ExoplanetsCalls {
 
-  def apply[F[_]: Async](client: Client[F],
-                         uri: Uri,
-                        ): Kleisli[OptionT[F, *], List[String], String] =
+  def apply[F[_] : Async](client: Client[F],
+                          uri: Uri,
+                         ): Kleisli[OptionT[F, *], List[String], String] =
     Kleisli[OptionT[F, *], List[String], String] {
-      case "all" :: Nil                                            =>
+      case "all" :: Nil =>
         OptionT.liftF {
           val target = uri / "exoplanets" / "all"
           client.expect[List[Exoplanet]](target).map(_.asJson.toString())
 
         }
 
-      case "random" :: amount :: Nil                                            =>
+      case "random" :: amount :: Nil =>
         OptionT.liftF {
           val target = uri / "exoplanets" / "random" / amount
           client.expect[List[Exoplanet]](target).map(_.asJson.toString())
 
         }
 
-      case _                                                                 =>
+      case _ =>
         OptionT.none
     }
 }

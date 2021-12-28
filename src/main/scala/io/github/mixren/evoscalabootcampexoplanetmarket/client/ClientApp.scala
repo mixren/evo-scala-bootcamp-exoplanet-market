@@ -2,6 +2,7 @@ package io.github.mixren.evoscalabootcampexoplanetmarket.client
 
 import cats.effect.{ExitCode, IO, IOApp, Ref}
 import fs2.Stream
+import io.github.mixren.evoscalabootcampexoplanetmarket.client.calls.{AllCalls, ExoplanetsCalls, HelpCalls, PurchaseCalls, UserCalls}
 import io.github.mixren.evoscalabootcampexoplanetmarket.utils.jwtoken.JWToken
 import org.http4s.ember.client._
 import org.http4s.implicits.http4sLiteralsSyntax

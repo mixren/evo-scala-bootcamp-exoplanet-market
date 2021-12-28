@@ -1,13 +1,13 @@
-package io.github.mixren.evoscalabootcampexoplanetmarket.client
+package io.github.mixren.evoscalabootcampexoplanetmarket.client.calls
 
 import cats.data.{Kleisli, OptionT}
 import cats.effect.kernel.Async
 
 object HelpCalls {
 
-  def apply[F[_]: Async](): Kleisli[OptionT[F, *], List[String], String] =
+  def apply[F[_] : Async](): Kleisli[OptionT[F, *], List[String], String] =
     Kleisli[OptionT[F, *], List[String], String] {
-      case Nil                                            =>
+      case Nil =>
         OptionT.some {
           """===========================================================================================================
             |All commands:
@@ -26,7 +26,7 @@ object HelpCalls {
             |""".stripMargin
         }
 
-      case _                                                                 =>
+      case _ =>
         OptionT.none
     }
 }
