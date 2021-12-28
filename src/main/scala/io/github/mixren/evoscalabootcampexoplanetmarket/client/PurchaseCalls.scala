@@ -48,7 +48,7 @@ object PurchaseCalls {
         OptionT.liftF {
           val target = uri / "purchase" / "auth" / "exoplanet"
           val args = exoOldNewCardRequest.removeColons
-          val bodyO = ExoOldNewCardRequest.jsonStrOf(args)
+          val bodyO = ExoOldNewCardRequest.novalidJsonStrOf(args)
           bodyO match {
             case None       => Async[F].pure("Error. Check if number of parameters after : is correct. Should be 6.")
             case Some(body) => tokenRef.get.flatMap{
