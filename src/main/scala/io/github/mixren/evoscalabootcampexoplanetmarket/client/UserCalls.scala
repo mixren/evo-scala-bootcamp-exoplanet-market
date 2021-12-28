@@ -24,7 +24,7 @@ object UserCalls {
 
   def apply[F[_]: Async](client: Client[F],
                          uri: Uri,
-                         ref :Ref[F, Option[JWToken]]
+                         tokenRef :Ref[F, Option[JWToken]]
                         ): Kleisli[OptionT[F, *], List[String], String] =
 
     Kleisli[OptionT[F, *], List[String], String] {
@@ -34,7 +34,7 @@ object UserCalls {
           val body = AuthRequest(UserName(username), AuthPassword(password))
           val req = Request[F](POST, target).withEntity(body)
           client.run(req).use { resp =>
-            ref.set(getToken(resp)) *> resp.bodyText.compile.string
+            tokenRef.set(getToken(resp)) *> resp.bodyText.compile.string
           }
         }
 
@@ -44,14 +44,14 @@ object UserCalls {
           val body = AuthRequest(UserName(username), AuthPassword(password))
           val req = Request[F](POST, target).withEntity(body)
           client.run(req).use { resp =>
-            ref.set(getToken(resp)) *> resp.bodyText.compile.string
+            tokenRef.set(getToken(resp)) *> resp.bodyText.compile.string
           }
         }
 
       case "auth" :: "loggedin" :: Nil                                            =>
         OptionT.liftF {
           val target = uri / "user" / "auth" / "loggedin"
-          ref.get.flatMap{
+          tokenRef.get.flatMap{
             case None         => Async[F].pure("Not valid token. Login first.")
             case Some(token)  => client.expect[String](Request[F](GET, target).withHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token.value))))
           }
