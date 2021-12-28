@@ -48,9 +48,9 @@ object PurchaseCalls {
         OptionT.liftF {
           val target = uri / "purchase" / "auth" / "exoplanet"
           val args = exoOldNewCardRequest.removeColons
-          val bodyO = ExoOldNewCardRequest.of(args)
+          val bodyO = ExoOldNewCardRequest.jsonStrOf(args)
           bodyO match {
-            case None       => Async[F].pure("Some parameters are not valid.")
+            case None       => Async[F].pure("Error. Check if number of parameters after : is correct. Should be 6.")
             case Some(body) => tokenRef.get.flatMap{
               case None         => Async[F].pure("Not valid token. Login first.")
               case Some(token)  => client.run(Request[F](POST, target)
