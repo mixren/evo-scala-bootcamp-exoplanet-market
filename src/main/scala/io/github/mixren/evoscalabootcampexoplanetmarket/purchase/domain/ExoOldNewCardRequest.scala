@@ -1,7 +1,6 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain
 
 import cats.effect.Concurrent
-import cats.implicits._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import io.github.mixren.evoscalabootcampexoplanetmarket.exoplanet.domain.{ExoplanetNewName, ExoplanetOfficialName}
