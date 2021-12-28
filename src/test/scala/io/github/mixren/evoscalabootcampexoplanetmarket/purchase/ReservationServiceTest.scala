@@ -75,7 +75,7 @@ class ReservationServiceTest extends AnyFlatSpec with MockFactory{
       purchaseRepositoryStub,
       Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
     )
-    val oneSecondReservation = 1.second
+    val oneSecondReservationDuration = 1.second
 
     exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
     exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
@@ -83,13 +83,13 @@ class ReservationServiceTest extends AnyFlatSpec with MockFactory{
     purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName1 returns IO.pure(None)
     purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
 
-    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, oneSecondReservation)
-    val reserveEx2U2 = reservationService.reserveExoplanet(realExoplanetName2, validUsername2, oneSecondReservation)
-    val reserveEx1U2 = reservationService.reserveExoplanet(realExoplanetName1, validUsername2, oneSecondReservation)
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, oneSecondReservationDuration)
+    val reserveEx2U2 = reservationService.reserveExoplanet(realExoplanetName2, validUsername2, oneSecondReservationDuration)
+    val reserveEx1U2 = reservationService.reserveExoplanet(realExoplanetName1, validUsername2, oneSecondReservationDuration)
 
     reserveEx1U1.unsafeRunSync()
     reserveEx2U2.unsafeRunSync()
-    IO.sleep(1.second).unsafeRunSync()
+    IO.sleep(oneSecondReservationDuration).unsafeRunSync()
 
     assert(reserveEx1U2.unsafeRunSync().isRight)
     assert(reserveEx2U2.unsafeRunSync().isRight)
@@ -180,7 +180,7 @@ class ReservationServiceTest extends AnyFlatSpec with MockFactory{
       purchaseRepositoryStub,
       Ref.of[IO, MapReservations](Map.empty).unsafeRunSync()
     )
-    val oneSecondReservation = 1.second
+    val oneSecondReservationDuration = 1.second
 
     exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName1 returns IO.pure(Some(exo1))
     exoplanetRepositoryStub.exoplanetByName _ when realExoplanetName2 returns IO.pure(Some(exo2))
@@ -190,9 +190,9 @@ class ReservationServiceTest extends AnyFlatSpec with MockFactory{
     purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName2 returns IO.pure(None)
     purchaseRepositoryStub.purchaseByExoOfficialName _ when realExoplanetName3 returns IO.pure(None)
 
-    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, oneSecondReservation)
-    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, oneSecondReservation)
-    val reserveEx3U2 = reservationService.reserveExoplanet(realExoplanetName3, validUsername2, oneSecondReservation)
+    val reserveEx1U1 = reservationService.reserveExoplanet(realExoplanetName1, validUsername1, oneSecondReservationDuration)
+    val reserveEx2U1 = reservationService.reserveExoplanet(realExoplanetName2, validUsername1, oneSecondReservationDuration)
+    val reserveEx3U2 = reservationService.reserveExoplanet(realExoplanetName3, validUsername2, oneSecondReservationDuration)
 
     val verify_Ex1U1  = reservationService.verifyAndExtendReservation(realExoplanetName1, validUsername1, reservationDuration)
     val verify_Ex2U1  = reservationService.verifyAndExtendReservation(realExoplanetName2, validUsername1, reservationDuration)
@@ -201,7 +201,7 @@ class ReservationServiceTest extends AnyFlatSpec with MockFactory{
     reserveEx1U1.unsafeRunSync()
     reserveEx2U1.unsafeRunSync()
     reserveEx3U2.unsafeRunSync()
-    IO.sleep(1.second).unsafeRunSync()
+    IO.sleep(oneSecondReservationDuration).unsafeRunSync()
 
     assert(verify_Ex1U1.unsafeRunSync().isLeft)
     assert(verify_Ex2U1.unsafeRunSync().isLeft)
