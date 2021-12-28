@@ -11,6 +11,7 @@ import scala.concurrent.duration.FiniteDuration
  * Useful, because users reserve exoplanets before purchasing them the reservations are stored in memory in cats Ref.
  */
 class ReservationCleaner[F[_]: Temporal](reservedExoplanets: Ref[F, MapReservations]) {
+
   def cleanExpired(): F[Unit] = reservedExoplanets.update(_.filter {
     case (_, (_, deadline)) => deadline.hasTimeLeft()
   })
