@@ -11,9 +11,9 @@ import io.github.mixren.evoscalabootcampexoplanetmarket.purchase.domain.ExoOldNe
 import io.github.mixren.evoscalabootcampexoplanetmarket.user.domain.AuthUser
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{AuthedRoutes, InvalidMessageBodyFailure}
-
+import org.http4s.{AuthedRoutes, HttpRoutes, InvalidMessageBodyFailure}
 import scala.concurrent.duration.DurationInt
+
 
 object PurchaseRoutes {
 
@@ -62,8 +62,23 @@ object PurchaseRoutes {
 
       // Get all purchases by user
       // curl http://localhost:8080/purchase/auth/history/user
-      case GET -> Root / "purchase" / "auth"/ "history" / "user" as user =>
+      case GET -> Root / "purchase" / "auth" / "history" / "user" as user =>
         Ok(purRepo.purchasesByUser(user.username))
+
+    }
+  }
+
+  def routes[F[_] : Async](implicit xa: HikariTransactor[F]): HttpRoutes[F] = {
+    val repo = new PurchaseRepository[F]
+    val dsl = new Http4sDsl[F] {}
+    import dsl._
+
+    HttpRoutes.of[F] {
+
+      // Get all purchases
+      // curl http://localhost:8080/purchase/history/all
+      case GET -> Root / "purchase" / "history" / "all" =>
+        Ok(repo.allPurchases)
 
     }
   }

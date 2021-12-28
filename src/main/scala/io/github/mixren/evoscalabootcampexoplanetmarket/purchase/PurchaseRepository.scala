@@ -13,6 +13,7 @@ trait PurchaseRepositoryT[F[_]] {
   def addPurchase(purchase: Purchase): F[Either[String, Int]]
   def purchaseByExoOfficialName(name: ExoplanetOfficialName): F[Option[Purchase]]
   def purchasesByUser(username: UserName): F[List[Purchase]]
+  def allPurchases: F[List[Purchase]]
 }
 
 class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) extends PurchaseRepositoryT[F] {
@@ -50,4 +51,11 @@ class PurchaseRepository[F[_]: Async](implicit xa: HikariTransactor[F]) extends 
       .transact(xa)
   }
 
+  override def allPurchases: F[List[Purchase]] =
+    sql"""SELECT exoplanet_official_name, exoplanet_bought_name, username, price, timestamp
+          FROM purchases
+       """
+      .query[Purchase]
+      .to[List]
+      .transact(xa)
 }
