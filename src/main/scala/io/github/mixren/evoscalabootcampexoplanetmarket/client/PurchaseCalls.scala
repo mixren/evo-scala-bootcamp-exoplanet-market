@@ -42,8 +42,7 @@ object PurchaseCalls {
           }
         }
 
-      // TODO Correct this call. I don't like that the validation errors are not shown because of ExoOldNewCardRequest.of(args)
-        // : Leo ssa b : very my name : Manny Hugo : {cardNumber} : {cardExpiration} : {cardCvc}
+      // : Leo ssa b : very my name : Manny Hugo : {cardNumber} : {cardExpiration} : {cardCvc}
       case "auth" :: "exoplanet" :: exoOldNewCardRequest  =>
         OptionT.liftF {
           val target = uri / "purchase" / "auth" / "exoplanet"
