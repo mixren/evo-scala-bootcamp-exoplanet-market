@@ -63,7 +63,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
       state.get(exoplanetName) match {
         case Some((sameUsername, deadline)) if sameUsername != username && deadline.isOverdue() =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), success(exoplanetName, username, reservationDuration))
-        case Some((sameUsername, _)) if sameUsername equals username  =>
+        case Some((sameUsername, _)) if sameUsername == username  =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), success(exoplanetName, username, reservationDuration))
         case None                                                     =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), success(exoplanetName, username, reservationDuration))
@@ -90,7 +90,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
   override def verifyAndExtendReservation(exoplanetName: ExoplanetOfficialName, username: UserName, reservationDuration: FiniteDuration): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
-        case Some((sameUsername, deadline)) if (sameUsername equals username) && deadline.hasTimeLeft() =>
+        case Some((sameUsername, deadline)) if (sameUsername == username) && deadline.hasTimeLeft() =>
           (state.updated(exoplanetName, (username, reservationDuration.fromNow)), ().asRight)
         case _                                                                                          =>
           (state, noReservation(exoplanetName, username))
@@ -101,7 +101,7 @@ class ReservationService[F[_]: Async](exoRepo: ExoplanetRepositoryT[F],
   override def releaseReservation(exoplanetName: ExoplanetOfficialName, username: UserName): F[Either[String, Unit]] =
     reservedExoplanets.modify{ state =>
       state.get(exoplanetName) match {
-        case Some((sameUsername, _)) if sameUsername equals username  =>
+        case Some((sameUsername, _)) if sameUsername == username  =>
           (state.removed(exoplanetName), ().asRight)
         case _                                                        =>
           (state, noRelease(exoplanetName, username))

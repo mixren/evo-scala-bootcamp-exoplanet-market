@@ -66,7 +66,7 @@ object PurchaseCalls {
           val target = uri / "purchase" / "auth" / "history" / "user"
           ref.get.flatMap{
             case None         => Async[F].pure("Not valid token. Login first.")
-            case Some(token)  => client.expect[List[Exoplanet]](Request[F](GET, target)
+            case Some(token)  => client.expect[List[Purchase]](Request[F](GET, target)
               .withHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token.value)))
             ).map(_.asJson.toString())
           }
