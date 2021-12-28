@@ -21,6 +21,7 @@ object HelpCalls {
             |7) purchase auth exoplanet : {exoplanetOldName} : {exoNewName} : {cardholderName} : {cardNumber} : {cardExpiration} : {cardCvc}
             |                                                 - purchase the reserved exoplanet by an authenticated user (Card Expiration ex.: 2023-12)
             |8) purchase auth history user                    - check all purchases by the authenticated user
+            |9) purchase history all                          - show all purchases by all users
             |===========================================================================================================
             |""".stripMargin
         }

@@ -69,6 +69,12 @@ object PurchaseCalls {
           }
         }
 
+      case "history" :: "all" :: Nil                                            =>
+        OptionT.liftF {
+          val target = uri / "purchase" / "history" / "all"
+          client.expect[List[Purchase]](target).map(_.asJson.toString())
+        }
+
       case _                                                                 =>
         OptionT.none
     }
