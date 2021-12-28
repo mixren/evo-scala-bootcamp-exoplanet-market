@@ -21,8 +21,6 @@ import org.http4s.{AuthScheme, Credentials, Request, Uri}
  */
 object PurchaseCalls {
 
-  def removeQuotes(str: String): String = str.stripPrefix("\"").stripSuffix("\"")
-
   def apply[F[_]: Async: ListFormatter](client: Client[F],
                                         uri: Uri,
                                         tokenRef :Ref[F, Option[JWToken]]
