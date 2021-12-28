@@ -5,7 +5,7 @@ import cats.data.{Kleisli, OptionT}
 import cats.syntax.all._
 
 trait ConsoleInterface[F[_]] {
-  def repl: F[Unit]
+  def start: F[Unit]
 }
 
 object ConsoleInterface {
@@ -14,6 +14,20 @@ object ConsoleInterface {
                                         calls: Kleisli[OptionT[F, *], List[String], String]
                                       ): ConsoleInterface[F] =
     new ConsoleInterface[F] {
+      val greetingMessage: String =
+        """
+          |================================================================
+          |Welcome to the ExoplanetMarket Client App!
+          |Here you can name any "unnamed" exoplanet as you wish for money.
+          |
+          |Tip: type "help" to see all commands.
+          |================================================================
+          | """.stripMargin
+
+      override def start: F[Unit] = {
+        Console[F].putLine(greetingMessage) *> repl
+      }
+
       def repl: F[Unit] = {
         val loop = for {
           line        <- Console[F].readLine // cart add ...
