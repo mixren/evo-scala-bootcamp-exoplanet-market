@@ -23,7 +23,6 @@ object Main extends IOApp {
         _                   <- cleaner.delayedCleaning(10.seconds).foreverM.start
         _                   <- ExoplanetmarketServer.stream[IO](reservedExoplanets).compile.drain.as(ExitCode.Success)
       } yield ExitCode.Success
-      //ExoplanetmarketServer.stream[IO].compile.drain.as(ExitCode.Success)
     }
   }
 }

@@ -15,6 +15,10 @@ object Console {
   implicit def syncConsole[F[_]: Sync]: Console[F] =
     new Console[F] {
       def readLine: F[String]             = Sync[F].delay{StdIn.readLine().trim}
-      def putLine(value: String): F[Unit] = Sync[F].delay(println(value))
+      def putLine(value: String): F[Unit] = Sync[F].delay{
+        println("---")
+        println(value)
+        println("---")
+      }
     }
 }
