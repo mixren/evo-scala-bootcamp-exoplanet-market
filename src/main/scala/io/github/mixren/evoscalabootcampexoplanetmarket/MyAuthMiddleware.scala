@@ -17,7 +17,7 @@ class MyAuthMiddleware[F[_]: Async] {
   val dsl = new Http4sDsl[F] {}
   import dsl._
 
-  // DO NOT ENCODE User password, password should be kept as hash and not used anywhere beside logging
+  // Since we dont group the users, only username is passed in the AuthUser
   private val authUser = Kleisli[F, Request[F], Either[String, AuthUser]] { req => {
     for {
       token     <- getToken(req)
@@ -27,7 +27,7 @@ class MyAuthMiddleware[F[_]: Async] {
   }.pure[F]
   }
 
-  // Keep in mind Bearer token is used here. You do not use Basic auth because it's not user and password what is passed
+  // Bearer token is used here. Basic auth is not used because it's not user and password what is passed
   private def getToken(request: Request[F]) = request.headers.get[Authorization] match {
     case Some(Authorization(Credentials.Token(AuthScheme.Bearer, token))) => JWToken(token).asRight[String]
     case Some(_)  => "Invalid auth header".asLeft[JWToken]
