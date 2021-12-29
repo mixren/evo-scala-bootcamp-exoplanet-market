@@ -1,7 +1,6 @@
 package io.github.mixren.evoscalabootcampexoplanetmarket.client
 
 import cats.effect.Sync
-import scala.io.AnsiColor._
 import scala.io.StdIn
 
 trait Console[F[_]] {
@@ -16,6 +15,6 @@ object Console {
   implicit def syncConsole[F[_]: Sync]: Console[F] =
     new Console[F] {
       def readLine: F[String]             = Sync[F].delay(StdIn.readLine())
-      def putLine(value: String): F[Unit] = Sync[F].delay(println(s"$MAGENTA$value$RESET"))
+      def putLine(value: String): F[Unit] = Sync[F].delay(println(value))
     }
 }
