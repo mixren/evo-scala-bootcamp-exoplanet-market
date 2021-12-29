@@ -15,7 +15,6 @@ import org.http4s.implicits.http4sLiteralsSyntax
 object ClientApp extends IOApp {
   val uri = uri"http://localhost:8080/"
 
-  // TODO mb add middleware for storing auth token
   override def run(args: List[String]): IO[ExitCode] = {
     (for {
       client    <- Stream.resource(EmberClientBuilder.default[IO].build)
