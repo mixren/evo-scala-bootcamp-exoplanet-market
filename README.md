@@ -22,7 +22,8 @@ Regularly check the online exoplanets data for updates.
 ## Current State
 Exoplanet Market project is completed within the framework of the Evolution Scala Bootcamp.  
 Might be extended further.  
-###Implemented functionality  
+
+### Implemented functionality  
 - Working http4s server and a client with a console user interface.
 - When a .csv exoplanets data from http://exoplanet.eu/catalog/ is stored in the project's resources,
 it can be filtered and converted into the local DB.
